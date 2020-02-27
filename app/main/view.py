@@ -164,6 +164,7 @@ def add_book_store():
             newstore.book_id = request.form.get('book_id')
             newstore.location = request.form.get('location')
             newstore.storage_number = request.form.get('number')
+            newstore.storage_date = session['admin_id']  #需要改成时间类型，再议！！！！！
             newstore.admin_id = session['admin_id']
 
             #将图书库存管理信息更改至图书表的剩余库存中
@@ -228,27 +229,82 @@ def search_book():
     form = SearchBookForm()
     return render_template('search_book.html', name=session.get('admin_name'), form=form)
 
-#根据信息查询书籍
+#根据信息查询书籍并返回前台从而显示查询结果
 @main.route('/find_book', methods=['GET','POST'])
 @login_required
 def find_book():
+    content = request.form.get('content') #表单中提交过来的，一定非None，故接下来不用判断了
+    #分别根据content内容进行数据库查询
+    def find_book_id():
+        return Book.query.filter(Book.book_id.contains(content)).all()
+    def find_book_name():
+        return Book.query.filter(Book.book_name.like('%'+content+'%')).all()
+    def find_author():
+        return Book.query.filter(Book.author.like('%'+content+'%')).all()
+    def find_publish_date():
+        return Book.query.filter(Book.publish_date.like('%'+content+'%')).all()
+    def find_average_rating():
+        return Book.query.filter(Book.average_rating == content).all()
+    def find_price():
+        return Book.query.filter(Book.price == content).all()
 
+    #不带括号的函数调用，如a=find_XXX，则a代表函数体而非结果，是一个函数对象，不须等该函数执行完成。
     methods = {
-        'book_name': find_name,
+        'book_id': find_book_id,
+        'book_name': find_book_name,
         'author': find_author,
-        'class_name': find_class,
-        'isbn': find_isbn
+        'publish_date': find_publish_date,
+        'average_rating': find_average_rating,
+        'price': find_price
     }
-    books = methods[request.form.get('method')]()
+    method = request.form.get('method')
+    # 根据类别查询到的有关书籍的book列表
+    books = methods[method]() #加上()即调用了函数，返回的是结果了，即返回了列表
     data = []
     for book in books:
-        count = Inventory.query.filter_by(isbn=book.isbn).count()
-        available = Inventory.query.filter_by(isbn=book.isbn, status=True).count()
-        item = {'isbn': book.isbn, 'book_name': book.book_name, 'press': book.press, 'author': book.author,
-                'class_name': book.class_name, 'count': count, 'available': available}
+        item = {
+            'book_id': book.book_id,
+            'book_name': book.book_name,
+            'author': book.author,
+            'average_rating': book.average_rating,
+            'price': book.price,
+            'publish_date': book.publish_date,
+            'publish_name': book.publish_name,
+            'store_number': book.store_number
+        }
         data.append(item)
     return jsonify(data)
 
+#管理员-显示历史库存操作记录
+@main.route('/list_add_operation', methods=['GET','POST'])
+@login_required
+def list_add_operation():
+    return render_template('list_add_operation.html', name=session.get('admin_name'))
+
+#搜索库存操作的记录数据返还给前端显示
+@main.route('/search_operation', methods=['GET','POST'])
+@login_required
+def search_operation():
+    data = []
+    # 查询到的库存操作的operations列表, 按照操作员id升序排序
+    operations = Inventory.query.order_by(Inventory.admin_id).all()
+    for op in operations:
+        book_id = op.book_id
+        book_name = Book.query.filter_by(book_id = book_id).first().book_name
+        admin_id = op.admin_id
+        admin_name = Admin.query.filter_by(admin_id = admin_id).first().admin_name
+        item = {
+            'bar_id': op.bar_id,
+            'book_id': op.book_id,
+            'book_name': book_name,
+            'admin_id': op.admin_id,
+            'admin_name': admin_name,
+            'storage_number': op.storage_number,
+            'storage_date': op.storage_date,
+            'location': op.location
+        }
+        data.append(item)
+    return jsonify(data)
 
 """
 #全屏框

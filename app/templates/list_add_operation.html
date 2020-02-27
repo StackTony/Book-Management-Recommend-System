@@ -1,0 +1,92 @@
+{% extends "base_admin.html" %}
+{% block title %}查询图书库存操作信息{% endblock %}
+
+{% block card %}<div class="layui-card-header"><h2>历史图书库存操作信息</h2></div>{% endblock %}
+{% block body %}
+<div id="remove">
+    <table lay-even id="result" lay-filter="re">
+        <thead>
+        <tr>
+            <th lay-data="{field:'bar_id', width:140}">本次操作的系统编号</th>
+            <th lay-data="{field:'book_id', width:140}">图书编号</th>
+            <th lay-data="{field:'book_name', width:200}">操作的图书名</th>
+            <th lay-data="{field:'admin_name', width:160}">本次操作的管理员</th>
+            <th lay-data="{field:'storage_number', width:120}">库存数目变动</th>
+            <th lay-data="{field:'storage_date', width:180}">操作日期</th>
+            <th lay-data="{field:'location', width:200}">本批次图书存放位置</th>
+        </tr>
+        </thead>
+
+        <tbody>
+
+        </tbody>
+
+    </table>
+</div>
+<table id="test" lay-filter="test"> </table>
+{% endblock %}
+
+{% block script %}
+<script>
+    layui.use(['table','jquery'], function(){
+        var table = layui.table;
+        var $ = layui.$;
+
+        table.init('re', {
+              height: 390
+              ,limit: 7
+              ,page: true
+        });
+
+        $(document).ready(function(){
+            $.ajax({
+                url:"{{ url_for('main.search_operation') }}",
+                type:"get",
+                processData:false,
+                contentType:false,
+                success:function(data){
+                    if (data.length !== 0){
+                        $('#remove').remove();
+                        table.render({
+                            elem: '#test'
+                            ,data:data
+                            ,cols: [[
+                                {field:'bar_id', title:'操作的系统编号', width:160}
+                                ,{field:'book_id', title:'图书编号', width:160}
+                                ,{field:'book_name', title:'图书名', width:180}
+                                ,{field:'admin_name', title:'操作的管理员', width:160}
+                                ,{field:'storage_number', title:'库存数目变动', width:160}
+                                ,{field:'storage_date', title:'操作日期', width:120}
+                                ,{field:'location', title:'本批次图书存放位置', width:180}
+                                ]]
+                            ,page: true
+                            ,height: 390
+                            ,limit: 7
+                            ,response: { //重新规定成功的状态码为 200，table 组件默认为 0
+                                statusCode: 200
+                            }
+                            ,parseData: function(data){ //将原始数据解析成 table 组件所规定的数据
+                                return {
+                                    "code": data.status, //解析接口状态
+                                    "msg": data.message, //解析提示文本
+                                    "count": data.total, //解析数据长度
+                                    "data": data.rows.item //解析数据列表
+                                };
+                            }
+                        });
+                    }
+                    else{
+                        layui.use('layer', function(){
+                                    var layer = layui.layer;
+
+                                    layer.msg('未找到任何结果',{time: 1000});
+                                });
+                    }
+
+                }
+            });
+        });
+
+    });
+</script>
+{% endblock %}

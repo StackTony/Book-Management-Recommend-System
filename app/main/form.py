@@ -34,11 +34,11 @@ class ChangePasswordForm(FlaskForm):
     password2 = PasswordField(u'确认新密码', validators=[DataRequired()])
     submit = SubmitField(u'确认修改')
 
-#用户/管理员-搜索框表单
+#用户/管理员-搜索图书表单
 class SearchBookForm(FlaskForm):
     #类别
-    methods = [('book_id', '书籍编号'), ('book_name', '图书名'), ('author', '作者'),
-               ('publish_date', '出版日期'), ('average_rating','评分'),('price','价格')]
+    methods = [('book_id', '图书编号'), ('book_name', '图书名'), ('author', '作者'),
+               ('publish_date', '出版日期'), ('average_rating','评分'), ('price','价格')]
     method = SelectField(choices=methods, validators=[DataRequired()], coerce=str)
     #查询内容
     content = StringField(validators=[DataRequired()])
@@ -59,7 +59,7 @@ class AddNewBookForm(FlaskForm):
     price = FloatField(validators=[DataRequired()])
     submit = SubmitField(u'添加')
 
-#管理员-添加书籍-库存添加表单
+#管理员-添加书籍-库存更新表单
 class AddBookStoreForm(FlaskForm):
     book_id = StringField(validators=[DataRequired(), Length(13)])
     number = IntegerField(validators=[DataRequired()]) #可正可负

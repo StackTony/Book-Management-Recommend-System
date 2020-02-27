@@ -3,7 +3,7 @@
 
 {% block card %}<div class="layui-card-header"><h2>查询图书信息</h2></div>{% endblock %}
 {% block body %}
-    <form class="layui-form" method="post" id="searchForm">
+<form class="layui-form" method="post" id="search_book" autocomplete="off">
     {{ form.csrf_token }}
         <div class="layui-form-item">
             <div class="layui-inline">
@@ -26,11 +26,11 @@
 
         </div>
     </form>
-    <div id="remove">
+<div id="remove">
     <table lay-even id="result" lay-filter="re">
         <thead>
         <tr>
-            <th lay-data="{field:'boo_id', width:140}">图书编号</th>
+            <th lay-data="{field:'book_id', width:140}">图书编号</th>
             <th lay-data="{field:'book_name', width:200}">图书名</th>
             <th lay-data="{field:'author', width:140}">作者</th>
             <th lay-data="{field:'average_rating', width:120}">评分</th>
@@ -45,13 +45,15 @@
         </tbody>
 
     </table>
-    </div>
-    <table id="test" lay-filter="test"></table>
+</div>
+
+<table id="test" lay-filter="test"> </table>
 
 {% endblock %}
 
+
 {% block script %}
-    <script>
+<script>
     layui.use(['form','table','jquery'], function(){
         var form = layui.form;
         var table = layui.table;
@@ -65,7 +67,7 @@
 
         $(document).ready(function(){
             $('#search').on('click',function () {
-                var form = new FormData(document.getElementById("searchForm"));
+                var form = new FormData(document.getElementById("search_book"));
                 if($('#content').val() === ""){
                     layui.use('layer', function(){
                         var layer = layui.layer;
@@ -87,14 +89,14 @@
                                     elem: '#test'
                                     ,data:data
                                     ,cols: [[
-                                      {field:'book_id', title:'图书编号', width:200}
+                                      {field:'book_id', title:'图书编号', width:180}
                                       ,{field:'book_name', title:'图书名', width:200}
                                       ,{field:'author', title:'作者', width:140}
-                                      ,{field:'average_rating', title:'评分', width:140}
-                                      ,{field:'author', title:'作者', width:140}
-                                      ,{field:'publish_data', title:'出版日期', width:140}
+                                      ,{field:'average_rating', title:'评分', width:120}
+                                      ,{field:'price', title:'价格', width:120}
+                                      ,{field:'publish_date', title:'出版日期', width:160}
                                       ,{field:'publish_name', title:'出版社', width:180}
-                                      ,{field:'price', title:'价格', width:140}
+                                      ,{field:'store_number', title:'库存图书量', width:120}
                                     ]]
                                     ,page: true
                                     ,height: 390
@@ -127,5 +129,5 @@
         });
 
     });
-    </script>
+</script>
 {% endblock %}

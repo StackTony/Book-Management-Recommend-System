@@ -11,7 +11,7 @@
 <!--login部分-->
 <div class="login-main">
     <header class="layui-elip">登录</header>
-    <form class="layui-form" method="post">
+    <form class="layui-form" method="post" autocomplete="on">
         {{ form.csrf_token }}
         <div class="layui-input-inline">
             {{ form.user_name(class="layui-input",placeholder="用户名") }}

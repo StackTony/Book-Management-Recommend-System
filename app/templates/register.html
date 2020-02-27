@@ -15,7 +15,7 @@
 <!--register部分-->
 <div class="register-main">
     <header class="layui-elip">注册</header>
-    <form class="layui-form" method="post">
+    <form class="layui-form" method="post" autocomplete="off">
         {{ form.csrf_token }}
         <div class="layui-input-inline">
             {{ form.user_name(class='layui-input',placeholder="用户名") }}

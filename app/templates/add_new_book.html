@@ -10,7 +10,7 @@
 {% endblock %}
 
 {% block body %}
-<form class="layui-form" method="post">
+<form class="layui-form" method="post" autocomplete="off">
     {{ form.csrf_token }}
     <div class="layui-form-item" style="height: 50px;margin-top: 30px;">
         <label class="layui-form-label" style="font-size: medium">图书编号：</label>
