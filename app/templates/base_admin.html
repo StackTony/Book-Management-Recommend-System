@@ -1,0 +1,112 @@
+<!-- 管理员登录后的界面
+#全屏框
+#顶部：   图书管理推荐系统                   <admin_name>▼         注销logout
+                                               个人信息
+                                               修改密码
+#左侧细分列：    用户管理user_manage        用户ID       用户名      年龄     性别      位置       删除用户
+                   添加用户add_book
+                   删除用户delete_book
+                书籍管理book_manage
+                   添加书籍（新书入库add_new_book   增加库存add_book_store）
+                   删除书籍delete_book
+                订单管理order_manage
+                用户信息查询
+                图书信息查询
+-->
+<!DOCTYPE html>
+<html lang="en">
+<!--头部部分-->
+<head>
+    <meta charset="UTF-8">
+    <title>{% block title %}欢迎使用图书管理推荐系统{% endblock %}</title>
+    <link rel="stylesheet" href="../static/layui/css/layui.css">
+    <link rel="stylesheet" href="../static/style.css">
+    <script src="https://cdn.staticfile.org/jquery/3.2.1/jquery.min.js"></script>
+    <script src="https://cdn.staticfile.org/popper.js/1.12.5/umd/popper.min.js"></script>
+    <script src="https://cdn.staticfile.org/twitter-bootstrap/4.1.0/js/bootstrap.min.js"></script>
+    <style>
+          .alert{position:relative;padding:.75rem 1.25rem;margin-bottom:1rem;border:1px solid transparent;border-radius:.25rem}
+          .close{position:absolute;top:0;right:0;padding:.75rem 1.25rem;color:inherit}
+          .alert-warning{color:#856404;background-color:#fff3cd;border-color:#ffeeba}
+          .close{float:right;font-size:1.5rem;font-weight:700;line-height:1;color:#000;text-shadow:0 1px 0 #fff;opacity:.5}
+          .close:focus,.close:hover{color:#000;text-decoration:none;opacity:.75}
+          .close:not(:disabled):not(.disabled){cursor:pointer}
+          button.close{padding:0;background-color:transparent;border:0;-webkit-appearance:none}
+          .close{padding:1rem;margin:-1rem -1rem -1rem auto}
+          .alert-dismissible .close{position:absolute;top:0;right:0;padding:.75rem 1.25rem;color:inherit}
+    </style>
+</head>
+
+<body class="layui-layout-body">
+<div class="layui-layout layui-layout-admin">
+    <!--index部分-->
+    <div class="layui-header layui-bg-cyan">
+        <div class="layui-logo"><span style="color:#F0F0F0;font-size: large">图书管理推荐系统</span></div>
+        <ul class="layui-nav layui-layout-right">
+            <li class="layui-nav-item">欢迎管理员，{{session["admin_name"]}}~</li>
+            <li class="layui-nav-item"><a class="aa" href="{{ url_for('main.logout') }}">注销</a></li>
+        </ul>
+    </div>
+
+    <!-- 左侧导航区域（可配合layui已有的垂直导航） -->
+    <div class="layui-side layui-bg-black">
+        <div class="layui-side-scroll">
+            <ul class="layui-nav layui-nav-tree" lay-filter="test">
+
+                <li class="layui-nav-item">
+                    <a class="" href="javascript:;">用户管理</a>
+                    <dl class="layui-nav-child">
+                        <dd><a href="{{ url_for('main.search_user') }}">用户信息查询</a></dd>
+                        <dd><a href="{{ url_for('main.add_user') }}">添加用户</a></dd>
+                        <dd><a href="{{ url_for('main.delete_user') }}">删除用户</a></dd>
+                    </dl>
+                </li>
+
+                <li class="layui-nav-item">
+                    <a class="" href="javascript:;">图书管理</a>
+                    <dl class="layui-nav-child">
+                        <dd><a href="{{ url_for('main.search_book') }}">图书信息查询</a></dd>
+                        <dd><a href="{{ url_for('main.add_new_book') }}">添加书籍</a></dd>
+                        <dd><a href="{{ url_for('main.delete_book') }}">删除书籍</a></dd>
+                    </dl>
+                </li>
+
+            </ul>
+        </div>
+    </div>
+
+    <!-- 内容主体区域 -->
+    <div class="layui-body">
+        <div class="layui-card layui-row layui-col-space10" style="margin:15px 10px;width:100%;">
+            {% for message in get_flashed_messages() %}
+            <div class="alert alert-warning">
+                <button type="button" class="close" data-dismiss="alert">&times;</button>
+                {{ message }}
+            </div>
+            {% endfor %}
+
+            {% block card %}
+            {% endblock %}
+
+            <div class="layui-card-body">
+                {% block body %}
+                {% endblock %}
+            </div>
+        </div>
+    </div>
+</div>
+
+<script src="../static/layui/layui.js"></script>
+<script>
+layui.use('element', function(){
+  var element = layui.element;
+  element.init();
+
+});
+</script>
+
+{% block script %}
+{% endblock %}
+
+</body>
+</html>

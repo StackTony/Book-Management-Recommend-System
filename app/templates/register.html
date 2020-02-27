@@ -1,0 +1,55 @@
+<!--注册界面
+---------------------------------------base
+#顶部：        用户注册
+#分列：  用户名：【请输入用户名】
+#         性别：o男  o女
+#         年龄：【】
+#         位置：【】
+#         密码：【请输入密码】
+#       确认密码：【请确认密码】
+#底部：          注册
+-------------------------------------register
+-->
+{% extends "index_unlog.html" %}
+{% block body %}
+<!--register部分-->
+<div class="register-main">
+    <header class="layui-elip">注册</header>
+    <form class="layui-form" method="post">
+        {{ form.csrf_token }}
+        <div class="layui-input-inline">
+            {{ form.user_name(class='layui-input',placeholder="用户名") }}
+        </div>
+        <div class="layui-input-inline">
+            {{ form.sex(class='layui-input',placeholder="性别") }}
+        </div>
+        <div class="layui-input-inline">
+            {{ form.age(class='layui-input',placeholder="年龄") }}
+        </div>
+        <div class="layui-input-inline">
+            {{ form.local(class='layui-input',placeholder="位置") }}
+        </div>
+        <div class="layui-input-inline">
+            {{ form.password(class="layui-input",placeholder="密码") }}
+        </div>
+        <div class="layui-input-inline">
+            {{ form.password2(class="layui-input",placeholder="确认密码") }}
+        </div>
+        <div class="layui-input-inline register-btn">
+            {{ form.submit(class="layui-btn") }}
+        </div>
+
+        <hr/>
+        <p><a href="javascript:;" class="fr">忘记密码请与系统管理员联系</a></p>
+    </form>
+</div>
+
+<!--用于将flash的消息输出-->
+{% for message in get_flashed_messages() %}
+    <div class="alert alert-warning">
+        <button type="button" class="close" data-dismiss="alert">&times;</button>
+            {{ message }}
+    </div>
+{% endfor %}
+
+{% endblock %}

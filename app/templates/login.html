@@ -1,0 +1,39 @@
+<!--登录界面
+------------------------------------------base
+#顶部：          登录
+#分列：  用户名：【请输入用户名】
+#        密码：【请输入密码】
+#底部：   忘记密码（请联系管理员）
+----------------------------------------login
+-->
+{% extends "index_unlog.html" %}
+{% block body %}
+<!--login部分-->
+<div class="login-main">
+    <header class="layui-elip">登录</header>
+    <form class="layui-form" method="post">
+        {{ form.csrf_token }}
+        <div class="layui-input-inline">
+            {{ form.user_name(class="layui-input",placeholder="用户名") }}
+        </div>
+        <div class="layui-input-inline">
+            {{ form.password(class="layui-input",placeholder="密码") }}
+        </div>
+        <div class="layui-input-inline login-btn">
+            {{ form.submit(class="layui-btn") }}
+        </div>
+
+        <hr/>
+        <p><a href="javascript:;" class="fr">忘记密码请与系统管理员联系</a></p>
+    </form>
+</div>
+
+<!--用于将flash的消息输出-->
+{% for message in get_flashed_messages() %}
+    <div class="alert alert-warning">
+        <button type="button" class="close" data-dismiss="alert">&times;</button>
+            {{ message }}
+    </div>
+{% endfor %}
+
+{% endblock %}
