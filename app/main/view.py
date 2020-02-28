@@ -104,7 +104,7 @@ def register():
 #左侧细分列：     用户管理user_manage        用户ID       用户名      年龄     性别      位置       删除用户
 #                书籍管理
 #                   添加书籍add_book
-#                   删除书籍delete_book
+#                   修改书籍modify_book
 #                订单管理order_manage
 #                用户信息查询search_user
 #                图书信息查询search_book
@@ -193,18 +193,36 @@ def add_book_store():
             return redirect(url_for('main.add_new_book'))
     return render_template('add_book_store.html', name=session.get('admin_name'), form=form)
 
-#管理员-图书管理-删除书籍
+#管理员-图书管理-修改图书基本信息
+# （含编辑和删除）（涉及库存的不能直接更改）
+@main.route('/modify_book', methods=['GET', 'POST'])
+@login_required
+def modify_book():
+    form = SearchBookForm()
+    # 利用ajax传值获取信息进行后台操作，放到delete_book和edit_book中
+    return render_template('modify_book.html', name=session.get('admin_name'), form=form)
+
+#管理员-图书管理-修改图书基本信息
+#删除图书
 @main.route('/delete_book', methods=['GET', 'POST'])
 @login_required
 def delete_book():
-    form = SearchBookForm()
-    return render_template('delete_book.html', name=session.get('admin_name'), form=form)
+    if request.method == 'POST':
+        book_id = request.values.get('book_id')
+        book = Book.query.filter_by(book_id=book_id).first()
+        if book is not None:
+            db.session.delete(book)
+            db.session.commit()
+            data = 'success'
+            return jsonify(data)
+
 
 #管理员-用户管理-用户删除
 @main.route('/delete_user', methods=['GET', 'POST'])
 @login_required
 def delete_user():
     form = SearchUserForm()
+
     return render_template('delete_user.html', name=session.get('admin_name'), form=form)
 
 #管理员-用户管理-添加用户

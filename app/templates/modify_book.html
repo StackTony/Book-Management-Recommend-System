@@ -1,7 +1,7 @@
 {% extends "base_admin.html" %}
-{% block title %}查询图书信息{% endblock %}
+{% block title %}修改图书信息{% endblock %}
 
-{% block card %}<div class="layui-card-header"><h2>查询图书信息</h2></div>{% endblock %}
+{% block card %}<div class="layui-card-header"><h2>查询需要修改的图书信息</h2></div>{% endblock %}
 {% block body %}
 <form class="layui-form" method="post" id="search_book" autocomplete="off">
     {{ form.csrf_token }}
@@ -27,16 +27,16 @@
         </div>
     </form>
 <div id="remove">
-    <table lay-even id="result" lay-filter="re">
+    <table class="layui-table" id="modify" lay-filter="modify">
         <thead>
         <tr>
             <th lay-data="{field:'book_id', width:180}">图书编号</th>
-            <th lay-data="{field:'book_name', width:180}">图书名</th>
-            <th lay-data="{field:'author', width:120}">作者</th>
+            <th lay-data="{field:'book_name', width:180, edit:'text'}">图书名</th>
+            <th lay-data="{field:'author', width:120, edit:'text'}">作者</th>
             <th lay-data="{field:'average_rating', sort:true, width:100}">评分</th>
-            <th lay-data="{field:'price', sort:true, width:100}">价格</th>
-            <th lay-data="{field:'publish_data', sort:true, width:120}">出版日期</th>
-            <th lay-data="{field:'publish_name', width:140}">出版社</th>
+            <th lay-data="{field:'price', sort:true, width:100, edit:'text'}">价格</th>
+            <th lay-data="{field:'publish_data', sort:true, width:120, edit:'text'}">出版日期</th>
+            <th lay-data="{field:'publish_name', width:140, edit:'text'}">出版社</th>
             <th lay-data="{field:'store_number', sort:true, width:120}">库存图书量</th>
         </tr>
         </thead>
@@ -48,19 +48,25 @@
     </table>
 </div>
 
-<table id="test" lay-filter="test"> </table>
+<table id="test" lay-filter="test">
+
+</table>
 
 {% endblock %}
 
 
 {% block script %}
+<script id="barDemo" type="text/html">
+  <a class="layui-btn layui-btn-danger layui-btn-xs" lay-event="del">删除</a>
+</script>
+
 <script>
     layui.use(['form','table','jquery'], function(){
         var form = layui.form;
         var table = layui.table;
         var $ = layui.$;
 
-        table.init('re', {
+        table.init('modify', {
               height: 390
               ,limit: 7
               ,page: true
@@ -90,15 +96,16 @@
                                     elem: '#test'
                                     ,data:data
                                     ,cols: [[
-                                        //{type: 'checkbox', fixed: 'left'} //开启选择框
+                                       // {type: 'checkbox', fixed: 'left'} //开启选择框
                                       {field:'book_id', title:'图书编号', width:180}
                                       ,{field:'book_name', title:'图书名', width:180}
-                                      ,{field:'author', title:'作者', width:120}
-                                      ,{field:'average_rating', title:'评分', sort:true, width:100}
-                                      ,{field:'price', title:'价格', sort:true, width:100}
-                                      ,{field:'publish_date', title:'出版日期', sort:true, width:120}
+                                      ,{field:'author', title:'作者', width:140}
+                                      ,{field:'average_rating', title:'评分', sort: true, width:120}
+                                      ,{field:'price', title:'价格', sort: true, width:120}
+                                      ,{field:'publish_date', title:'出版日期', sort: true, width:140}
                                       ,{field:'publish_name', title:'出版社', width:140}
-                                      ,{field:'store_number', title:'库存图书量',sort:true, width:120}
+                                      ,{field:'store_number', title:'库存图书量',sort:true, width:140}
+                                      ,{fixed: 'right', title:'操作', toolbar: '#barDemo'}
                                     ]]
                                     ,page: true
                                     ,height: 390
@@ -115,6 +122,37 @@
                                       };
                                     }
                                 });
+                                 //监听行工具事件
+                                table.on('tool(test)', function(obj){
+                                    var data = obj.data;
+                                    //console.log(obj)
+                                    if(obj.event === 'del'){
+                                        layer.confirm('真的删除该图书的信息么？', function(index){
+                                            delbook(data,index,obj);
+                                        });
+
+                                        function delbook(data,index,obj) {
+                                            $.ajax({
+                                                url:"{{ url_for('main.delete_book') }}",
+                                                type:"POST",
+                                                data:data,
+                                                success: function (data) {
+                                                    if(data == 'success'){
+                                                        layer.close(index);
+                                                        obj.del();
+                                                        layer.msg("删除成功！");
+                                                    }
+                                                    else {
+                                                        layer.msg("删除失败！");
+                                                    }
+                                                }
+                                            });
+                                        }
+                                    }
+                                });
+                                
+
+                                
                             }
                             else{
                                 layui.use('layer', function(){
