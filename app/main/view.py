@@ -216,6 +216,32 @@ def delete_book():
             data = 'success'
             return jsonify(data)
 
+#管理员-图书管理-修改图书基本信息
+#编辑图书
+@main.route('/edit_book', methods=['GET', 'POST'])
+@login_required
+def edit_book():
+    if request.method == 'POST':
+        book_id = request.values.get('book_id')
+        field = request.values.get('edit_field')
+        value = request.values.get('new_value')
+        book = Book.query.filter_by(book_id=book_id).first()
+        if book is not None:
+            if field == 'book_name':
+                book.book_name = value
+            elif field == 'author':
+                book.author = value
+            elif field == 'price':
+                book.price = value
+            elif field == 'publish_date':
+                book.publish_date = value
+            elif field == 'publish_name':
+                book.publish_name = value
+            else:
+                return jsonify('false')
+            db.session.commit()
+            data = 'ok'
+            return jsonify(data)
 
 #管理员-用户管理-用户删除
 @main.route('/delete_user', methods=['GET', 'POST'])

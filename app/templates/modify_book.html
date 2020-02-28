@@ -98,12 +98,12 @@
                                     ,cols: [[
                                        // {type: 'checkbox', fixed: 'left'} //开启选择框
                                       {field:'book_id', title:'图书编号', width:180}
-                                      ,{field:'book_name', title:'图书名', width:180}
-                                      ,{field:'author', title:'作者', width:140}
+                                      ,{field:'book_name', title:'图书名', edit:'text', width:180}
+                                      ,{field:'author', title:'作者', edit:'text', width:140}
                                       ,{field:'average_rating', title:'评分', sort: true, width:120}
-                                      ,{field:'price', title:'价格', sort: true, width:120}
-                                      ,{field:'publish_date', title:'出版日期', sort: true, width:140}
-                                      ,{field:'publish_name', title:'出版社', width:140}
+                                      ,{field:'price', title:'价格', sort: true, edit:'text', width:120}
+                                      ,{field:'publish_date', title:'出版日期', sort: true, edit:'text', width:140}
+                                      ,{field:'publish_name', title:'出版社', edit:'text', width:140}
                                       ,{field:'store_number', title:'库存图书量',sort:true, width:140}
                                       ,{fixed: 'right', title:'操作', toolbar: '#barDemo'}
                                     ]]
@@ -122,10 +122,10 @@
                                       };
                                     }
                                 });
-                                 //监听行工具事件
+                                 //监听行工具事件-删除操作
                                 table.on('tool(test)', function(obj){
                                     var data = obj.data;
-                                    //console.log(obj)
+                                    //console.log(obj) //调试输出对象数据
                                     if(obj.event === 'del'){
                                         layer.confirm('真的删除该图书的信息么？', function(index){
                                             delbook(data,index,obj);
@@ -137,6 +137,7 @@
                                                 type:"POST",
                                                 data:data,
                                                 success: function (data) {
+                                                    //接受data为后台是否成功的消息
                                                     if(data == 'success'){
                                                         layer.close(index);
                                                         obj.del();
@@ -150,9 +151,27 @@
                                         }
                                     }
                                 });
-                                
 
-                                
+                                //监听单元格编辑
+                                table.on('edit(test)', function(obj){
+                                    var value = obj.value //得到修改后的值
+                                    ,data = obj.data //得到所在行所有键值
+                                    ,field = obj.field; //得到字段
+                                    $.ajax({
+                                        url:"{{ url_for('main.edit_book') }}",
+                                        type:"POST",
+                                        data:{"edit_field":field,"new_value":value,"book_id": data.book_id},
+                                        success: function (data) {
+                                            if(data == 'ok'){
+                                                layer.msg('[ID: '+ data.book_id +'] ' + field + ' 字段更改为：'+ value);
+                                            }
+                                            else{
+                                                layer.msg('编辑无效！')
+                                            }
+                                        }
+                                    })
+
+                                });
                             }
                             else{
                                 layui.use('layer', function(){
