@@ -59,21 +59,23 @@
                     <a class="" href="javascript:;">用户管理</a>
                     <dl class="layui-nav-child">
                         <dd><a href="{{ url_for('main.search_user') }}">用户信息查询</a></dd>
-                        <dd><a href="{{ url_for('main.add_user') }}">添加用户</a></dd>
-                        <dd><a href="{{ url_for('main.delete_user') }}">删除用户</a></dd>
+                        <dd><a href="{{ url_for('main.add_user') }}">添加新用户</a></dd>
+                        <dd><a href="{{ url_for('main.delete_user') }}">删除已有用户</a></dd>
                     </dl>
                 </li>
 
                 <li class="layui-nav-item">
                     <a class="" href="javascript:;">图书管理</a>
                     <dl class="layui-nav-child">
-                        <dd><a href="{{ url_for('main.search_book') }}">图书信息查询</a></dd>
-                        <dd><a href="{{ url_for('main.add_new_book') }}">添加新书籍</a></dd>
+                        <dd><a href="{{ url_for('main.search_book') }}">库存图书信息查询</a></dd>
+                        <dd><a href="{{ url_for('main.add_new_book') }}">入库新书籍</a></dd>
                         <dd><a href="{{ url_for('main.modify_book') }}">修改图书信息</a></dd>
                     </dl>
                 </li>
                 <li class="layui-nav-item">
                     <a class="" href="{{ url_for('main.list_order_info') }}">订单详情信息</a>
+                </li>
+                <li class="layui-nav-item">
                     <a class="" href="{{ url_for('main.list_add_operation') }}">图书库存历史操作</a>
                 </li>
             </ul>

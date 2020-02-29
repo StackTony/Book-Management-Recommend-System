@@ -1,18 +1,10 @@
 <!-- 用户登录后的界面
 #全屏框
-#顶部：   图书管理推荐系统                欢迎您，<user_name>~       注销logout
+#顶部：       图书管理推荐系统                          登录   注册
 #左侧细分列：
-             热门书籍hot_book
+             热门书籍hot_book           书ID   书名  作者  评分   出版年份   出版社
              查看图书列表search_book
-             我的账户                       书ID   书名  作者  评分   出版年份   出版社
-                基本信息user_info
-                修改信息change_info
-             我的书籍
-                我的书架book_shelf
-                个性推荐book_recommend
-             我的订单
-                订单信息order_info
-                购书下单add_order
+
 
 -->
 
@@ -45,10 +37,12 @@
 <div class="layui-layout layui-layout-admin">
     <!--index部分-->
     <div class="layui-header layui-bg-cyan">
-        <div class="layui-logo"><span style="color:#F0F0F0;font-size: large">图书管理推荐系统</span></div>
+        <div class="layui-logo">
+            <span style="color:#F0F0F0;font-size: large">图书管理推荐系统</span>
+        </div>
         <ul class="layui-nav layui-layout-right">
-            <li class="layui-nav-item">欢迎用户，{{session["user_name"]}}~ </li>
-            <li class="layui-nav-item"><a class="aa" href="{{ url_for('main.logout') }}">注销</a></li>
+            <li class="layui-nav-item"><a class="aa" href="{{ url_for('main.login') }}">登录</a></li>
+            <li class="layui-nav-item"><a class="aa" href="{{ url_for('main.register') }}">注册</a></li>
         </ul>
     </div>
      <!-- 左侧导航区域（可配合layui已有的垂直导航） -->
@@ -56,33 +50,10 @@
         <div class="layui-side-scroll">
             <ul class="layui-nav layui-nav-tree" lay-filter="test">
                 <li class="layui-nav-item">
-                    <a class="" href="{{ url_for('main.list_order_info') }}">热门书籍</a>
+                    <a class="a" href="{{ url_for('main.hot_book') }}">热门书籍</a>
                 </li>
                 <li class="layui-nav-item">
-                    <a class="" href="{{ url_for('main.search_book') }}">图书商城</a>
-                </li>
-                <li class="layui-nav-item">
-                    <a class="" href="javascript:;">我的账户</a>
-                    <dl class="layui-nav-child">
-                        <dd><a href="{{ url_for('main.search_user') }}">个人信息</a></dd>
-                        <dd><a href="{{ url_for('main.add_user') }}">订单信息</a></dd>
-                        <dd><a href="{{ url_for('main.delete_user') }}">修改密码</a></dd>
-                    </dl>
-                </li>
-
-                <li class="layui-nav-item">
-                    <a class="" href="javascript:;">我的图书</a>
-                    <dl class="layui-nav-child">
-                        <dd><a href="{{ url_for('main.search_book') }}">我的书架</a></dd>
-                        <dd><a href="{{ url_for('main.add_new_book') }}">个性推荐</a></dd>
-                    </dl>
-                </li>
-                <li class="layui-nav-item">
-                    <a class="" href="javascript:;">我的订单</a>
-                    <dl class="layui-nav-child">
-                        <dd><a href="{{ url_for('main.search_book') }}">订单信息</a></dd>
-                        <dd><a href="{{ url_for('main.add_new_book') }}">删除订单</a></dd>
-                    </dl>
+                    <a class="aa" href="{{ url_for('main.search_book') }}">图书查询</a>
                 </li>
             </ul>
         </div>

@@ -1,19 +1,20 @@
-{% extends "base_admin.html" %}
-{% block title %}查询图书库存操作信息{% endblock %}
+{% extends "base.html" %}
+{% block title %}图书商城信息列表{% endblock %}
 
-{% block card %}<div class="layui-card-header"><h2>历史图书库存操作信息</h2></div>{% endblock %}
+{% block card %}<div class="layui-card-header"><h2>图书信息列表</h2></div>{% endblock %}
 {% block body %}
 <div id="remove">
     <table lay-even id="result" lay-filter="re">
         <thead>
         <tr>
-            <th lay-data="{field:'bar_id', width:140}">本次操作的系统编号</th>
-            <th lay-data="{field:'book_id', width:140}">图书编号</th>
-            <th lay-data="{field:'book_name', width:200}">操作的图书名</th>
-            <th lay-data="{field:'admin_name',sort:true, width:160}">本次操作的管理员</th>
-            <th lay-data="{field:'storage_number',sort:true, width:120}">库存数目变动</th>
-            <th lay-data="{field:'storage_date', sort:true, width:180}">操作日期</th>
-            <th lay-data="{field:'location',sort:true, width:200}">本批次图书存放位置</th>
+            <th lay-data="{field:'book_id', width:180}">图书编号</th>
+            <th lay-data="{field:'book_name', width:180}">图书名</th>
+            <th lay-data="{field:'author', width:120}">作者</th>
+            <th lay-data="{field:'average_rating', sort:true, width:100}">评分</th>
+            <th lay-data="{field:'price', sort:true, width:100}">价格</th>
+            <th lay-data="{field:'publish_data', sort:true, width:120}">出版日期</th>
+            <th lay-data="{field:'publish_name', width:140}">出版社</th>
+            <th lay-data="{field:'store_number', sort:true, width:120}">库存图书量</th>
         </tr>
         </thead>
 
@@ -23,12 +24,16 @@
 
     </table>
 </div>
+
 <table id="test" lay-filter="test"> </table>
+
 {% endblock %}
+
 
 {% block script %}
 <script>
     layui.use(['table','jquery'], function(){
+        var form = layui.form;
         var table = layui.table;
         var $ = layui.$;
 
@@ -40,7 +45,7 @@
 
         $(document).ready(function(){
             $.ajax({
-                url:"{{ url_for('main.search_operation') }}",
+                url:"{{ url_for('main.list_all_book') }}",
                 type:"get",
                 processData:false,
                 contentType:false,
@@ -51,19 +56,21 @@
                             elem: '#test'
                             ,data:data
                             ,cols: [[
-                                {field:'bar_id', title:'操作的系统编号', width:160}
-                                ,{field:'book_id', title:'图书编号', width:160}
+                                //{type: 'checkbox', fixed: 'left'} //开启选择框
+                                {field:'book_id', title:'图书编号', width:180}
                                 ,{field:'book_name', title:'图书名', width:180}
-                                ,{field:'admin_name', title:'操作的管理员',sort:true,  width:160}
-                                ,{field:'storage_number', title:'库存数目变动',sort:true,  width:160}
-                                ,{field:'storage_date', title:'操作日期',sort:true,  width:120}
-                                ,{field:'location', title:'本批次图书存放位置',sort:true,  width:180}
-                                ]]
+                                ,{field:'author', title:'作者', width:120}
+                                ,{field:'average_rating', title:'评分', sort:true, width:100}
+                                ,{field:'price', title:'价格', sort:true, width:100}
+                                ,{field:'publish_date', title:'出版日期', sort:true, width:120}
+                                ,{field:'publish_name', title:'出版社', width:140}
+                                ,{field:'store_number', title:'库存图书量',sort:true, width:120}
+                            ]]
                             ,page: true
                             ,height: 390
                             ,limit: 7
-                            ,response: { //重新规定成功的状态码为 200，table 组件默认为 0
-                                statusCode: 200
+                            ,response: {
+                                statusCode: 200 //重新规定成功的状态码为 200，table 组件默认为 0
                             }
                             ,parseData: function(data){ //将原始数据解析成 table 组件所规定的数据
                                 return {
@@ -82,11 +89,9 @@
                             layer.msg('未找到任何结果',{time: 1000});
                         });
                     }
-
                 }
             });
         });
-
-    });
+    })
 </script>
 {% endblock %}

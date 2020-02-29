@@ -10,103 +10,103 @@ from .. import db
 from . import main
 from ..models import User, Admin, Book, Rating, Cart, Inventory
 
-
+#首页   √
 @main.route('/', methods=['GET', 'POST'])
 def index():
-    return render_template('index_unlog.html')
+    session['admin_id'] = ''
+    session['admin_name'] = ''
+    session['user_id'] = ''
+    session['user_name'] = ''
+    return render_template('base.html')
 
-"""
-#图框
-#顶部：          登录
-#分列：  用户名：【请输入用户名】
-#        密码：【请输入密码】
-#底部：          登录
-#底部：   忘记密码（请联系管理员）
-"""
-#用户/管理员-登录
-@main.route('/login', methods=['GET', 'POST'])
-def login():
-    form = LoginForm()
-    #等价于if form.validate_on_submit():
-    if form.validate_on_submit():
-        name = form.user_name.data
-        pwd = form.password.data
-        user_tmp1 = User.query.filter_by(user_name=name, password=pwd).first()
-        user_tmp2 = Admin.query.filter_by(admin_name=name, password=pwd).first()
-        #在User和Admin表中均未找到，则说明输入无效
-        if user_tmp1 is None and user_tmp2 is None:
-            flash('账号或密码错误！')
-            return redirect(url_for('main.login'))
-        #在用户表中匹配到
-        if user_tmp1 is not None:
-            login_user(user_tmp1)
-            session['user_id'] = user_tmp1.user_id
-            session['user_name'] = user_tmp1.user_name
-            flash("用户登录成功！")
-            return redirect(url_for('main.base_user'))
-        #在管理员表中匹配到
-        elif user_tmp2 is not None:
-            login_user(user_tmp2)
-            session['admin_id'] = user_tmp2.admin_id
-            session['admin_name'] = user_tmp2.admin_name
-            flash("管理员登录成功！")
-            return redirect(url_for('main.base_admin'))
-    return render_template('login.html', form=form)
+#热门图书（列出所有图书，按照评分高低排序）
+@main.route('/hot_book', methods = ['GET','POST'])
+def hot_book():
+    return render_template('hot_book.html')
+#不需要根据特定类别名查询，将所有书籍信息返回前端
+@main.route('/list_all_book', methods = ['GET','POST'])
+def list_all_book():
+    data = []
+    books = Book.query.order_by(Book.average_rating.desc()).all()
+    for book in books:
+        item = {
+            'book_id': book.book_id,
+            'book_name': book.book_name,
+            'author': book.author,
+            'average_rating': book.average_rating,
+            'price': book.price,
+            'publish_date': book.publish_date,
+            'publish_name': book.publish_name,
+            'store_number': book.store_number
+        }
+        data.append(item)
+    return jsonify(data)
 
-"""
-#图框
-#顶部：        用户注册
-#分列：  用户名：【请输入用户名】
-#         性别：o男  o女
-#         年龄：【】
-#         位置：【】
-#         密码：【请输入密码】
-#       确认密码：【请确认密码】
-#底部：          注册
-"""
-#用户-注册
-@main.route('/register', methods=['GET', 'POST'])
-def register():
-    form = RegisterForm()
-    if form.validate_on_submit():
-        name = form.user_name.data
-        sex = form.sex.data
-        age = form.age.data
-        local = form.local.data
-        pwd = form.password.data
-        pwd2 = form.password2.data
-        user_id = np.random.randint(0,100000)
-        #确保产生的user_id作为主键是唯一的
-        exist_id = User.query.filter_by(user_id = user_id).first()
-        while(exist_id is not None):
-            user_id = np.random.randint(0, 100000)
-            exist_id = User.query.filter_by(user_id = user_id).first()
-        #产生新用户，并插入数据库
-        new_user = User(user_id, name, sex, age, local, pwd)
-        if new_user.verify_password(pwd2) is True:
-            # db是SQLAlchemy()实例化对象，用于数据库操作
-            db.session.add(new_user)
-            db.session.commit()
-            flash("注册成功！")
-            #放入login_user中，否则会由于login_manage程序跳转到登录界面
-            login_user(new_user)
-            session['user_id'] = new_user.user_id
-            session['user_name'] = new_user.user_name
-            return redirect(url_for('main.base_user'))
-        else:
-            flash("两次密码不一致！")
-            return redirect(url_for('main.register'))
-    return render_template('register.html', form=form)
+#书籍信息查询   √
+@main.route('/search_book', methods=['GET', 'POST'])
+def search_book():
+    form = SearchBookForm()
+    if session.get('admin_name') != '':
+        return render_template('search_book.html', name=session.get('admin_name'), form=form)
+    elif session.get('user_name') != '':
+        return render_template('search_book.html', name=session.get('user_name'), form=form)
+    else:
+        return render_template('search_book.html', name='', form=form)
+#根据信息查询书籍并返回前台从而显示查询结果
+@main.route('/find_book', methods=['GET','POST'])
+def find_book():
+    content = request.form.get('content') #表单中提交过来的，一定非None，故接下来不用判断了
+    #分别根据content内容进行数据库查询
+    def find_book_id():
+        return Book.query.filter(Book.book_id.contains(content)).all()
+    def find_book_name():
+        return Book.query.filter(Book.book_name.like('%'+content+'%')).all()
+    def find_author():
+        return Book.query.filter(Book.author.like('%'+content+'%')).all()
+    def find_publish_date():
+        return Book.query.filter(Book.publish_date.like('%'+content+'%')).all()
+    def find_average_rating():
+        return Book.query.filter(Book.average_rating == content).all()
+    def find_price():
+        return Book.query.filter(Book.price == content).all()
 
+    #不带括号的函数调用，如a=find_XXX，则a代表函数体而非结果，是一个函数对象，不须等该函数执行完成。
+    methods = {
+        'book_id': find_book_id,
+        'book_name': find_book_name,
+        'author': find_author,
+        'publish_date': find_publish_date,
+        'average_rating': find_average_rating,
+        'price': find_price
+    }
+    method = request.form.get('method')
+    # 根据类别查询到的有关书籍的book列表
+    books = methods[method]() #加上()即调用了函数，返回的是结果了，即返回了列表
+    data = []
+    for book in books:
+        item = {
+            'book_id': book.book_id,
+            'book_name': book.book_name,
+            'author': book.author,
+            'average_rating': book.average_rating,
+            'price': book.price,
+            'publish_date': book.publish_date,
+            'publish_name': book.publish_name,
+            'store_number': book.store_number
+        }
+        data.append(item)
+    return jsonify(data)
 
-#管理员登录后的页面
+#####################管理员功能区########################
+
+#管理员登录后的页面   √
 @main.route('/base_admin')
 @login_required
 def base_admin():
     return render_template('base_admin.html', name=session.get('admin_name'))
 
 
-#管理员-图书管理-添加书籍-新书入库
+#管理员-图书管理-添加书籍-新书入库   √
 @main.route('/add_new_book', methods=['GET', 'POST'])
 @login_required
 def add_new_book():
@@ -186,7 +186,7 @@ def add_book_store():
     return render_template('add_book_store.html', name=session.get('admin_name'), form=form)
 
 
-#管理员-图书管理-修改图书基本信息
+#管理员-图书管理-修改图书基本信息   √
 # （含编辑和删除）（涉及库存的不能直接更改）
 @main.route('/modify_book', methods=['GET', 'POST'])
 @login_required
@@ -235,7 +235,7 @@ def edit_book():
             return jsonify(data)
 
 
-#管理员-显示订单信息
+#管理员-显示订单信息   √
 @main.route('/list_order_info', methods=['GET','POST'])
 @login_required
 def list_order_info():
@@ -267,7 +267,7 @@ def search_order():
     return jsonify(data)
 
 
-#管理员-显示历史库存操作记录
+#管理员-显示历史库存操作记录   √
 @main.route('/list_add_operation', methods=['GET','POST'])
 @login_required
 def list_add_operation():
@@ -314,7 +314,7 @@ def add_user():
     return render_template('add_user.html', name=session.get('admin_name'), form=form)
 
 
-#管理员-用户管理-用户信息查询
+#管理员-用户管理-用户信息查询   √
 @main.route('/search_user', methods=['GET', 'POST'])
 @login_required
 def search_user():
@@ -379,75 +379,54 @@ def find_user():
     return jsonify(data)
 
 
-#用户/管理员-书籍信息查询
-@main.route('/search_book', methods=['GET', 'POST'])
-@login_required
-def search_book():
-    form = SearchBookForm()
-    return render_template('search_book.html', name=session.get('admin_name'), form=form)
-#根据信息查询书籍并返回前台从而显示查询结果
-@main.route('/find_book', methods=['GET','POST'])
-@login_required
-def find_book():
-    content = request.form.get('content') #表单中提交过来的，一定非None，故接下来不用判断了
-    #分别根据content内容进行数据库查询
-    def find_book_id():
-        return Book.query.filter(Book.book_id.contains(content)).all()
-    def find_book_name():
-        return Book.query.filter(Book.book_name.like('%'+content+'%')).all()
-    def find_author():
-        return Book.query.filter(Book.author.like('%'+content+'%')).all()
-    def find_publish_date():
-        return Book.query.filter(Book.publish_date.like('%'+content+'%')).all()
-    def find_average_rating():
-        return Book.query.filter(Book.average_rating == content).all()
-    def find_price():
-        return Book.query.filter(Book.price == content).all()
-
-    #不带括号的函数调用，如a=find_XXX，则a代表函数体而非结果，是一个函数对象，不须等该函数执行完成。
-    methods = {
-        'book_id': find_book_id,
-        'book_name': find_book_name,
-        'author': find_author,
-        'publish_date': find_publish_date,
-        'average_rating': find_average_rating,
-        'price': find_price
-    }
-    method = request.form.get('method')
-    # 根据类别查询到的有关书籍的book列表
-    books = methods[method]() #加上()即调用了函数，返回的是结果了，即返回了列表
-    data = []
-    for book in books:
-        item = {
-            'book_id': book.book_id,
-            'book_name': book.book_name,
-            'author': book.author,
-            'average_rating': book.average_rating,
-            'price': book.price,
-            'publish_date': book.publish_date,
-            'publish_name': book.publish_name,
-            'store_number': book.store_number
-        }
-        data.append(item)
-    return jsonify(data)
-
-
+###########################用户功能区#############################
 
 """
-#全屏框
-#顶部：      图书管理推荐系统                  欢迎您，<user_name>~       注销
-#左侧细分列：          
-             我的账户          
-                基本信息
-                修改信息
-             我的书籍
-                我的书架
-                猜你喜欢
-             我的订单
-                添加订单
-                删除订单
-             图书信息查询
+#图框
+#顶部：        用户注册
+#分列：  用户名：【请输入用户名】
+#         性别：o男  o女
+#         年龄：【】
+#         位置：【】
+#         密码：【请输入密码】
+#       确认密码：【请确认密码】
+#底部：          注册
 """
+#用户-注册   √
+@main.route('/register', methods=['GET', 'POST'])
+def register():
+    form = RegisterForm()
+    if form.validate_on_submit():
+        name = form.user_name.data
+        sex = form.sex.data
+        age = form.age.data
+        local = form.local.data
+        pwd = form.password.data
+        pwd2 = form.password2.data
+        user_id = np.random.randint(0,100000)
+        #确保产生的user_id作为主键是唯一的
+        exist_id = User.query.filter_by(user_id = user_id).first()
+        while(exist_id is not None):
+            user_id = np.random.randint(0, 100000)
+            exist_id = User.query.filter_by(user_id = user_id).first()
+        #产生新用户，并插入数据库
+        new_user = User(user_id, name, sex, age, local, pwd)
+        if new_user.verify_password(pwd2) is True:
+            # db是SQLAlchemy()实例化对象，用于数据库操作
+            db.session.add(new_user)
+            db.session.commit()
+            flash("注册成功！")
+            #放入login_user中，否则会由于login_manage程序跳转到登录界面
+            login_user(new_user)
+            session['user_id'] = new_user.user_id
+            session['user_name'] = new_user.user_name
+            return redirect(url_for('main.base_user'))
+        else:
+            flash("两次密码不一致！")
+            return redirect(url_for('main.register'))
+    return render_template('register.html', form=form)
+
+
 #用户登录后的主页
 @main.route('/base_user')
 @login_required
@@ -455,12 +434,52 @@ def base_user():
     return render_template('base_user.html', name = session.get('user_name'))
 
 
-#用户/管理员-注销
+#######################用户/管理员公用区###########################
+
+"""
+#图框
+#顶部：          登录
+#分列：  用户名：【请输入用户名】
+#        密码：【请输入密码】
+#底部：          登录
+#底部：   忘记密码（请联系管理员）
+"""
+#用户/管理员-登录   √
+@main.route('/login', methods=['GET', 'POST'])
+def login():
+    form = LoginForm()
+    #等价于if form.validate_on_submit():
+    if form.validate_on_submit():
+        name = form.user_name.data
+        pwd = form.password.data
+        user_tmp1 = User.query.filter_by(user_name=name, password=pwd).first()
+        user_tmp2 = Admin.query.filter_by(admin_name=name, password=pwd).first()
+        #在User和Admin表中均未找到，则说明输入无效
+        if user_tmp1 is None and user_tmp2 is None:
+            flash('账号或密码错误！')
+            return redirect(url_for('main.login'))
+        #在用户表中匹配到
+        if user_tmp1 is not None:
+            login_user(user_tmp1)
+            session['user_id'] = user_tmp1.user_id
+            session['user_name'] = user_tmp1.user_name
+            flash("用户登录成功！")
+            return redirect(url_for('main.base_user'))
+        #在管理员表中匹配到
+        elif user_tmp2 is not None:
+            login_user(user_tmp2)
+            session['admin_id'] = user_tmp2.admin_id
+            session['admin_name'] = user_tmp2.admin_name
+            flash("管理员登录成功！")
+            return redirect(url_for('main.base_admin'))
+    return render_template('login.html', form=form)
+
+
+#用户/管理员-注销   √
 @main.route('/logout')
-@login_required
 def logout():
     logout_user()
     session.clear()
-    return redirect(url_for('main.login'))
+    return redirect(url_for('main.index'))
 
 
