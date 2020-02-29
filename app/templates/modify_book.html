@@ -92,6 +92,7 @@
                         success:function(data){
                             if (data.length !== 0){
                                 $('#remove').remove();
+
                                 table.render({
                                     elem: '#test'
                                     ,data:data
@@ -151,7 +152,6 @@
                                         }
                                     }
                                 });
-
                                 //监听单元格编辑
                                 table.on('edit(test)', function(obj){
                                     var value = obj.value //得到修改后的值
@@ -163,7 +163,7 @@
                                         data:{"edit_field":field,"new_value":value,"book_id": data.book_id},
                                         success: function (data) {
                                             if(data == 'ok'){
-                                                layer.msg('[ID: '+ data.book_id +'] ' + field + ' 字段更改为：'+ value);
+                                                layer.msg(field + ' 字段更改为：'+ value);
                                             }
                                             else{
                                                 layer.msg('编辑无效！')

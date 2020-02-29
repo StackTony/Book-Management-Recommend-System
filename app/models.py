@@ -121,6 +121,7 @@ class Rating(db.Model):
 *订单编号ID（主）
 *用户编号ID（外）
 *图书编号ID（外）
+*下单时间
 *订购数量
 *总价
 """
@@ -130,6 +131,7 @@ class Cart(db.Model):
     user_id = db.Column(db.ForeignKey('user.user_id'))
     book_id = db.Column(db.ForeignKey('book.book_id'))
     buy_number = db.Column(db.Integer)
+    buy_date = db.Column(db.String(20))
     total_price = db.Column(db.Float(5))
 
     def __repr__(self):

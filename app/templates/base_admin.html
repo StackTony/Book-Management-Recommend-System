@@ -4,14 +4,16 @@
                                                个人信息
                                                修改密码
 #左侧细分列：    用户管理user_manage        用户ID       用户名      年龄     性别      位置       删除用户
-                   添加用户add_book
-                   删除用户delete_book
+                   用户信息查询search_user
+                   删除用户delete_user
                 书籍管理book_manage
+                   图书信息查询search_book
                    添加书籍（新书入库add_new_book   增加库存add_book_store）
-                   删除书籍delete_book
-                订单管理order_manage
-                用户信息查询
-                图书信息查询
+                   修改书籍信息（编辑书籍信息edit_book     删除书籍delete_book）
+                查看订单详情list_order_info
+                库存操作信息列表list_add_operation
+
+
 -->
 <!DOCTYPE html>
 <html lang="en">
@@ -71,6 +73,7 @@
                     </dl>
                 </li>
                 <li class="layui-nav-item">
+                    <a class="" href="{{ url_for('main.list_order_info') }}">订单详情信息</a>
                     <a class="" href="{{ url_for('main.list_add_operation') }}">图书库存历史操作</a>
                 </li>
             </ul>

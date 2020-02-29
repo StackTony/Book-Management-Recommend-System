@@ -36,7 +36,7 @@ def login():
         #在User和Admin表中均未找到，则说明输入无效
         if user_tmp1 is None and user_tmp2 is None:
             flash('账号或密码错误！')
-            return redirect(url_for('login'))
+            return redirect(url_for('main.login'))
         #在用户表中匹配到
         if user_tmp1 is not None:
             login_user(user_tmp1)
@@ -98,22 +98,13 @@ def register():
             return redirect(url_for('main.register'))
     return render_template('register.html', form=form)
 
-"""
-#全屏框
-#顶部：   图书管理推荐系统                   欢迎您，<admin_name>~           注销logout
-#左侧细分列：     用户管理user_manage        用户ID       用户名      年龄     性别      位置       删除用户
-#                书籍管理
-#                   添加书籍add_book
-#                   修改书籍modify_book
-#                订单管理order_manage
-#                用户信息查询search_user
-#                图书信息查询search_book
-"""
+
 #管理员登录后的页面
 @main.route('/base_admin')
 @login_required
 def base_admin():
     return render_template('base_admin.html', name=session.get('admin_name'))
+
 
 #管理员-图书管理-添加书籍-新书入库
 @main.route('/add_new_book', methods=['GET', 'POST'])
@@ -142,6 +133,7 @@ def add_new_book():
             return redirect(url_for('main.add_book_store'))
 
     return render_template('add_new_book.html', name=session.get('admin_name'), form=form)
+
 
 #管理员-图书管理-添加书籍-库存补充
 @main.route('/add_book_store', methods=['GET', 'POST'])
@@ -193,6 +185,7 @@ def add_book_store():
             return redirect(url_for('main.add_new_book'))
     return render_template('add_book_store.html', name=session.get('admin_name'), form=form)
 
+
 #管理员-图书管理-修改图书基本信息
 # （含编辑和删除）（涉及库存的不能直接更改）
 @main.route('/modify_book', methods=['GET', 'POST'])
@@ -201,7 +194,6 @@ def modify_book():
     form = SearchBookForm()
     # 利用ajax传值获取信息进行后台操作，放到delete_book和edit_book中
     return render_template('modify_book.html', name=session.get('admin_name'), form=form)
-
 #管理员-图书管理-修改图书基本信息
 #删除图书
 @main.route('/delete_book', methods=['GET', 'POST'])
@@ -215,7 +207,6 @@ def delete_book():
             db.session.commit()
             data = 'success'
             return jsonify(data)
-
 #管理员-图书管理-修改图书基本信息
 #编辑图书
 @main.route('/edit_book', methods=['GET', 'POST'])
@@ -243,13 +234,77 @@ def edit_book():
             data = 'ok'
             return jsonify(data)
 
+
+#管理员-显示订单信息
+@main.route('/list_order_info', methods=['GET','POST'])
+@login_required
+def list_order_info():
+    return render_template('list_order_info.html', name=session.get('admin_name'))
+#管理员-搜索订单信息返回前端显示
+@main.route('/search_order', methods=['GET','POST'])
+@login_required
+def search_order():
+    data = []
+    orders = Cart.query.all()
+    for order in orders:
+        book_id = order.book_id
+        book_name = Book.query.filter_by(book_id = book_id).first().book_name
+        book_price = Book.query.filter_by(book_id=book_id).first().price
+        user_id = order.user_id
+        user_name = User.query.filter_by(user_id = user_id).first().user_name
+        item = {
+            'cart_id': order.cart_id,
+            'book_id': book_id,
+            'book_name': book_name,
+            'user_id': user_id,
+            'user_name': user_name,
+            'buy_number': order.buy_number,
+            'buy_date':order.buy_date,
+            'price': book_price,
+            'total_price': order.total_price
+        }
+        data.append(item)
+    return jsonify(data)
+
+
+#管理员-显示历史库存操作记录
+@main.route('/list_add_operation', methods=['GET','POST'])
+@login_required
+def list_add_operation():
+    return render_template('list_add_operation.html', name=session.get('admin_name'))
+#搜索库存操作的记录数据返还给前端显示
+@main.route('/search_operation', methods=['GET','POST'])
+@login_required
+def search_operation():
+    data = []
+    # 查询到的库存操作的operations列表, 按照操作员id升序排序
+    operations = Inventory.query.order_by(Inventory.admin_id).all()
+    for op in operations:
+        book_id = op.book_id
+        book_name = Book.query.filter_by(book_id = book_id).first().book_name
+        admin_id = op.admin_id
+        admin_name = Admin.query.filter_by(admin_id = admin_id).first().admin_name
+        item = {
+            'bar_id': op.bar_id,
+            'book_id': op.book_id,
+            'book_name': book_name,
+            'admin_id': op.admin_id,
+            'admin_name': admin_name,
+            'storage_number': op.storage_number,
+            'storage_date': op.storage_date,
+            'location': op.location
+        }
+        data.append(item)
+    return jsonify(data)
+
+
 #管理员-用户管理-用户删除
 @main.route('/delete_user', methods=['GET', 'POST'])
 @login_required
 def delete_user():
     form = SearchUserForm()
-
     return render_template('delete_user.html', name=session.get('admin_name'), form=form)
+
 
 #管理员-用户管理-添加用户
 @main.route('/add_user', methods=['GET', 'POST'])
@@ -265,6 +320,64 @@ def add_user():
 def search_user():
     form = SearchUserForm()
     return render_template('search_user.html', name=session.get('admin_name'), form=form)
+#根据用户信息查询用户及其订单等信息并返回前台显示查询结果
+@main.route('/find_user', methods=['GET','POST'])
+@login_required
+def find_user():
+    content = request.form.get('content') #表单中提交过来的，一定非None，故接下来不用判断了
+    #分别根据content内容进行数据库查询
+    def find_user_id():
+        return User.query.filter(User.user_id.contains(content)).all()
+    def find_user_name():
+        return User.query.filter(User.user_name.like('%'+content+'%')).all()
+    def find_age():
+        return User.query.filter(User.age == content).all()
+    def find_local():
+        return User.query.filter(User.local.like('%'+content+'%')).all()
+
+    #不带括号的函数调用，如a=find_XXX，则a代表函数体而非结果，是一个函数对象，不须等该函数执行完成。
+    methods = {
+        'user_id': find_user_id,
+        'user_name': find_user_name,
+        'age': find_age,
+        'local': find_local
+    }
+    method = request.form.get('method')
+    # 根据类别查询到的有关用户的user列表
+    users = methods[method]() #加上()即调用了函数，返回的是结果了，即返回了列表
+    data = []
+    for user in users:
+        user_id = user.user_id
+        carts = Cart.query.filter(user_id == user_id).all()
+        for cart in carts:
+            book_id = cart.book_id
+            book = Book.query.filter(book_id == book_id).first()
+            item = {
+                #用户信息
+                'user_id': user_id,
+                'user_name': user.user_name,
+                'sex': user.sex,
+                'age': user.age,
+                'local': user.local,
+                'password': user.password,
+                # 订单信息
+                'cart_id': cart.cart_id,
+                'buy_number': cart.buy_number,
+                'buy_date': cart.buy_date,
+                'total_price': cart.total_price,
+                #图书信息
+                'book_id': book.book_id,
+                'book_name': book.book_name,
+                'author': book.author,
+                'average_rating': book.average_rating,
+                'price': book.price,
+                'publish_date': book.publish_date,
+                'publish_name': book.publish_name,
+                'store_number': book.store_number
+            }
+            data.append(item)
+    return jsonify(data)
+
 
 #用户/管理员-书籍信息查询
 @main.route('/search_book', methods=['GET', 'POST'])
@@ -272,7 +385,6 @@ def search_user():
 def search_book():
     form = SearchBookForm()
     return render_template('search_book.html', name=session.get('admin_name'), form=form)
-
 #根据信息查询书籍并返回前台从而显示查询结果
 @main.route('/find_book', methods=['GET','POST'])
 @login_required
@@ -319,36 +431,7 @@ def find_book():
         data.append(item)
     return jsonify(data)
 
-#管理员-显示历史库存操作记录
-@main.route('/list_add_operation', methods=['GET','POST'])
-@login_required
-def list_add_operation():
-    return render_template('list_add_operation.html', name=session.get('admin_name'))
 
-#搜索库存操作的记录数据返还给前端显示
-@main.route('/search_operation', methods=['GET','POST'])
-@login_required
-def search_operation():
-    data = []
-    # 查询到的库存操作的operations列表, 按照操作员id升序排序
-    operations = Inventory.query.order_by(Inventory.admin_id).all()
-    for op in operations:
-        book_id = op.book_id
-        book_name = Book.query.filter_by(book_id = book_id).first().book_name
-        admin_id = op.admin_id
-        admin_name = Admin.query.filter_by(admin_id = admin_id).first().admin_name
-        item = {
-            'bar_id': op.bar_id,
-            'book_id': op.book_id,
-            'book_name': book_name,
-            'admin_id': op.admin_id,
-            'admin_name': admin_name,
-            'storage_number': op.storage_number,
-            'storage_date': op.storage_date,
-            'location': op.location
-        }
-        data.append(item)
-    return jsonify(data)
 
 """
 #全屏框

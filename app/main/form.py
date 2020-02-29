@@ -46,7 +46,11 @@ class SearchBookForm(FlaskForm):
 
 #管理员-搜索用户表单
 class SearchUserForm(FlaskForm):
-    user_name = StringField(validators=[DataRequired()])
+    # 类别
+    methods = [('user_id', '用户编号'), ('user_name', '用户名'), ('age', '年龄'), ('local', '位置')]
+    method = SelectField(choices=methods, validators=[DataRequired()], coerce=str)
+    # 查询内容
+    content = StringField(validators=[DataRequired()])
     submit = SubmitField('搜索')
 
 #管理员-添加书籍-新书入库表单
