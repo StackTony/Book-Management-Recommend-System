@@ -1,4 +1,11 @@
+{% if name == '' %}
 {% extends "base.html" %}
+{% elif session['admin_name'] != '' %}
+{% extends "base_admin.html" %}
+{% elif session['user_name'] != '' %}
+{% extends "base_user.html" %}
+{% endif %}
+
 {% block title %}图书商城信息列表{% endblock %}
 
 {% block card %}<div class="layui-card-header"><h2>图书信息列表</h2></div>{% endblock %}

@@ -69,13 +69,3 @@ class AddBookStoreForm(FlaskForm):
     number = IntegerField(validators=[DataRequired()]) #可正可负
     location = StringField(validators=[DataRequired(), Length(1, 64)])
     submit = SubmitField(u'添加')
-
-#管理员-添加用户表单
-class AddUserForm(FlaskForm):
-    user_id = IntegerField(validators=[DataRequired()])
-    user_name = StringField(validators=[DataRequired(), Length(1, 64)])
-    sex = StringField(validators=[DataRequired(), Length(1, 64)])
-    age = IntegerField(validators=[DataRequired()])
-    local = StringField(validators=[DataRequired(), Length(1, 64)])
-    password = StringField(validators=[DataRequired(), Length(1, 64)])
-    submit = SubmitField(u'添加')

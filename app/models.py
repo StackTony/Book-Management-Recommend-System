@@ -128,8 +128,8 @@ class Rating(db.Model):
 class Cart(db.Model):
     __tablename__ =  'cart'
     cart_id = db.Column(db.String(10), primary_key=True)
-    user_id = db.Column(db.ForeignKey('user.user_id'))
-    book_id = db.Column(db.ForeignKey('book.book_id'))
+    user_id = db.Column(db.Integer)
+    book_id = db.Column(db.String(13))
     buy_number = db.Column(db.Integer)
     buy_date = db.Column(db.String(20))
     total_price = db.Column(db.Float(5))

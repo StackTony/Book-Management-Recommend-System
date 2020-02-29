@@ -1,10 +1,165 @@
-<!DOCTYPE html>
-<html lang="en">
-<head>
-    <meta charset="UTF-8">
-    <title>Title</title>
-</head>
-<body>
+{% extends "base_admin.html" %}
+{% block title %}查询用户信息{% endblock %}
 
-</body>
-</html>
+{% block card %}<div class="layui-card-header"><h2>查询用户相关信息</h2></div>{% endblock %}
+{% block body %}
+<form class="layui-form" method="post" id="delete" autocomplete="off">
+    {{ form.csrf_token }}
+    <div class="layui-form-item">
+        <div class="layui-inline">
+            <div class="layui-row layui-col-space10">
+                <div class="layui-col-md4">
+                    {{ form.method(class="layui-input-inline") }}
+                </div>
+                <div class="layui-col-md6">
+                    <label class="layui-form-label">查询内容：</label>
+                    <div class="layui-input-inline">
+                        {{ form.content(class="layui-input",style="width:250px") }}
+                    </div>
+                </div>
+                <div class="layui-col-md2">
+                    <div class="layui-input-inline">{{ form.submit(class="layui-btn", id="search") }}</div>
+                </div>
+            </div>
+        </div>
+    </div>
+</form>
+
+
+<div id="remove">
+    <table lay-even id="result" lay-filter="re">
+        <thead>
+        <tr>
+            <th lay-data="{field:'user_id', width:140}">用户编号</th>
+            <th lay-data="{field:'user_name', width:140}">用户名</th>
+            <th lay-data="{field:'sex', sort:true, width:100}">性别</th>
+            <th lay-data="{field:'age', sort:true, width:100}">年龄</th>
+            <th lay-data="{field:'local', sort:true, width:140}">位置</th>
+            <th lay-data="{field:'password', width:140}">密码</th>
+
+        </tr>
+        </thead>
+
+        <tbody>
+
+        </tbody>
+
+    </table>
+</div>
+
+<table id="test" lay-filter="test"> </table>
+
+{% endblock %}
+
+
+{% block script %}
+<script id="barDemo" type="text/html">
+  <a class="layui-btn layui-btn-danger layui-btn-xs" lay-event="del">删除</a>
+</script>
+
+<script>
+    layui.use(['form','table','jquery'], function(){
+        var form = layui.form;
+        var table = layui.table;
+        var $ = layui.$;
+
+        table.init('re', {
+              height: 390
+              ,limit: 7
+              ,page: true
+        });
+
+        $(document).ready(function(){
+            $('#search').on('click',function () {
+                var form = new FormData(document.getElementById("delete"));
+                if($('#content').val() === ""){
+                    layui.use('layer', function(){
+                        var layer = layui.layer;
+
+                        layer.msg('请填写查询内容',{time: 800});
+                    });
+                }
+                else{
+                    $.ajax({
+                        url:"{{ url_for('main.find_user') }}",
+                        type:"post",
+                        data:form,
+                        processData:false,
+                        contentType:false,
+                        success:function(data){
+                            if (data.length !== 0){
+                                $('#remove').remove();
+                                table.render({
+                                    elem: '#test'
+                                    ,data:data
+                                    ,cols: [[
+                                     //{type: 'checkbox', fixed: 'left'} //开启选择框
+                                      {field:'user_id', title:'用户编号', width:140}
+                                      ,{field:'user_name', title:'用户名', width:140}
+                                      ,{field:'sex', title:'性别', sort:true, width:100}
+                                      ,{field:'age', title:'年龄', sort:true, width:100}
+                                      ,{field:'local', title:'位置', width:140}
+                                      ,{field:'password', title:'密码', width:140}
+                                      ,{fixed: 'right', title:'操作', toolbar: '#barDemo'}
+                                    ]]
+                                    ,page: true
+                                    ,height: 390
+                                    ,limit: 7
+                                    ,response: {
+                                      statusCode: 200 //重新规定成功的状态码为 200，table 组件默认为 0
+                                    }
+                                    ,parseData: function(data){ //将原始数据解析成 table 组件所规定的数据
+                                      return {
+                                        "code": data.status, //解析接口状态
+                                        "msg": data.message, //解析提示文本
+                                        "count": data.total, //解析数据长度
+                                        "data": data.rows.item //解析数据列表
+                                      };
+                                    }
+                                });
+                                //监听行工具事件-删除操作
+                                table.on('tool(test)', function(obj){
+                                    var data = obj.data;
+                                    //console.log(obj) //调试输出对象数据
+                                    if(obj.event === 'del'){
+                                        layer.confirm('真的删除该用户么？', function(index){
+                                            deluser(data,index,obj);
+                                        });
+                                        function deluser(data,index,obj) {
+                                            $.ajax({
+                                                url:"{{ url_for('main.del_user') }}",
+                                                type:"POST",
+                                                data:data,
+                                                success: function (data) {
+                                                    //接受data为后台是否成功的消息
+                                                    if(data == 'success'){
+                                                        layer.close(index);
+                                                        obj.del();
+                                                        layer.msg("删除成功！");
+                                                    }
+                                                    else {
+                                                        layer.msg("删除失败！");
+                                                    }
+                                                }
+                                            });
+                                        }
+                                    }
+                                });
+                            }
+                            else{
+                                layui.use('layer', function(){
+                                    var layer = layui.layer;
+
+                                    layer.msg('未找到任何结果',{time: 1000});
+                                });
+                            }
+                        }
+                    });
+                }
+                return false;
+            })
+        });
+
+    });
+</script>
+{% endblock %}

@@ -56,7 +56,7 @@
         <div class="layui-side-scroll">
             <ul class="layui-nav layui-nav-tree" lay-filter="test">
                 <li class="layui-nav-item">
-                    <a class="" href="{{ url_for('main.list_order_info') }}">热门书籍</a>
+                    <a class="" href="{{ url_for('main.hot_book') }}">热门书籍</a>
                 </li>
                 <li class="layui-nav-item">
                     <a class="" href="{{ url_for('main.search_book') }}">图书商城</a>
@@ -65,7 +65,7 @@
                     <a class="" href="javascript:;">我的账户</a>
                     <dl class="layui-nav-child">
                         <dd><a href="{{ url_for('main.search_user') }}">个人信息</a></dd>
-                        <dd><a href="{{ url_for('main.add_user') }}">订单信息</a></dd>
+                        <dd><a href="{{ url_for('main.delete_user') }}">订单信息</a></dd>
                         <dd><a href="{{ url_for('main.delete_user') }}">修改密码</a></dd>
                     </dl>
                 </li>

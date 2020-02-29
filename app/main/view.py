@@ -4,7 +4,7 @@ import time, datetime
 import numpy as np
 from flask import render_template, session, redirect, url_for, flash, request, jsonify
 from flask_login import login_user, logout_user, login_required, current_user, login_manager
-from .form import LoginForm, RegisterForm, SearchUserForm, SearchBookForm, AddUserForm, AddNewBookForm, \
+from .form import LoginForm, RegisterForm, SearchUserForm, SearchBookForm, AddNewBookForm, \
     AddBookStoreForm
 from .. import db
 from . import main
@@ -17,12 +17,18 @@ def index():
     session['admin_name'] = ''
     session['user_id'] = ''
     session['user_name'] = ''
-    return render_template('base.html')
+    return render_template('base.html', name = '')
 
 #热门图书（列出所有图书，按照评分高低排序）
 @main.route('/hot_book', methods = ['GET','POST'])
 def hot_book():
-    return render_template('hot_book.html')
+    if session['user_name'] == '' and session['admin_name'] == '':
+        return render_template('hot_book.html',name = '')
+    elif session['user_name'] != '':
+        return render_template('hot_book.html', name=session['user_name'])
+    else:
+        return render_template('hot_book.html', name=session['admin_name'])
+
 #不需要根据特定类别名查询，将所有书籍信息返回前端
 @main.route('/list_all_book', methods = ['GET','POST'])
 def list_all_book():
@@ -304,14 +310,19 @@ def search_operation():
 def delete_user():
     form = SearchUserForm()
     return render_template('delete_user.html', name=session.get('admin_name'), form=form)
-
-
-#管理员-用户管理-添加用户
-@main.route('/add_user', methods=['GET', 'POST'])
+#管理员-删除用户
+@main.route('/del_user', methods=['GET', 'POST'])
 @login_required
-def add_user():
-    form = AddUserForm()
-    return render_template('add_user.html', name=session.get('admin_name'), form=form)
+def del_user():
+    if request.method == 'POST':
+        user_id = request.values.get('user_id')
+        user = User.query.filter_by(user_id=user_id).first()
+        if user is not None:
+            db.session.delete(user)
+            db.session.commit()
+            data = 'success'
+            return jsonify(data)
+
 
 
 #管理员-用户管理-用户信息查询   √
