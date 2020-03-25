@@ -34,6 +34,16 @@ class ChangePasswordForm(FlaskForm):
     password2 = PasswordField(u'确认新密码', validators=[DataRequired()])
     submit = SubmitField(u'确认修改')
 
+#用户-基本信息（编辑修改）表单
+class UserInfoForm(FlaskForm):
+    user_name = StringField(u'用户名', validators=[DataRequired()])
+    methods = [('男', '男'), ('女', '女')]
+    sex = SelectField(u'性别', choices=methods, validators=[DataRequired()], coerce=str)
+    age = IntegerField(u'年龄', validators=[DataRequired()])
+    local = StringField(u'位置', validators=[DataRequired()])
+    password = PasswordField(u'密码', validators=[DataRequired()])
+    submit = SubmitField(u'保存个人资料')
+
 #用户/管理员-搜索图书表单
 class SearchBookForm(FlaskForm):
     #类别

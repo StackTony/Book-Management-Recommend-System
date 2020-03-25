@@ -1,0 +1,98 @@
+{% extends "base_user.html" %}
+{% block card %}
+    <div class="layui-card-header"><h2>个人信息</h2></div>
+{% endblock %}
+
+{% block body %}
+<form class="layui-form" lay-filter="show">
+    <div class="layui-form-item">
+        <label class="layui-form-label">用户名：</label>
+        <div class="layui-input-block">
+            <input name="user_name" class="layui-input" style="width:300px" type="text" autocomplete="off">
+        </div>
+    </div>
+    <div class="layui-form-item">
+        <label class="layui-form-label">密码：</label>
+        <div class="layui-input-block">
+            <input name="password" disabled class="layui-input" style="width:300px" type="password" autocomplete="off">
+        </div>
+    </div>
+    <div class="layui-form-item">
+        <label class="layui-form-label">性别：</label>
+        <div class="layui-input-block">
+            <input name="sex" title="男" type="radio" checked="" value="男">
+            <input name="sex" title="女" type="radio" value="女">
+        </div>
+    </div>
+    <div class="layui-form-item">
+        <label class="layui-form-label">年龄：</label>
+        <div class="layui-input-block">
+            <input name="age" class="layui-input" style="width:300px" type="text" autocomplete="off">
+        </div>
+    </div>
+    <div class="layui-form-item">
+        <label class="layui-form-label">位置：</label>
+        <div class="layui-input-block">
+            <input name="local" class="layui-input" style="width:300px" type="text" autocomplete="off">
+        </div>
+    </div>
+    <div class="layui-form-item" style="height: 50px; width: 200px">
+        <div class="layui-input-block">
+            <button class="layui-btn" lay-submit lay-filter="modify">保存个人资料</button>
+        </div>
+    </div>
+
+</form>
+{% endblock %}
+
+{% block script %}
+<script>
+    layui.use(['table','jquery'], function(){
+        var form = layui.form;
+        var $ = layui.$;
+        form.on('submit(modify)',function (data) {
+            //layer.msg(JSON.stringify(data.field));
+            $.ajax({
+            url:"{{ url_for('main.modify_my_info') }}",
+            type: "post",
+            data: {
+                "user_name": data.field['user_name'],
+                "sex": data.field['sex'],
+                "age": data.field['age'],
+                "local": data.field['local']
+            },
+            success:function (data) {
+                if(data == 'success') {
+                    layer.msg('保存成功！')
+                }
+                else{
+                    layer.msg('修改失败！')
+                }
+
+            }
+        })
+            return false
+        })
+
+        $.ajax({
+            url:"{{ url_for('main.get_my_info') }}",
+            type:"get",
+            processData:false,
+            contentType:false,
+            success:function(data) {
+                //alert(JSON.stringify(data));
+                //显示基本信息
+                form.val('show', {
+                    "user_name": data['user_name'],
+                    "sex": data['sex'],
+                    "age": data['age'],
+                    "local": data['local'],
+                    "password":  data['password']
+                });
+            }
+
+        });
+
+    });
+</script>
+{% endblock %}

@@ -1,0 +1,153 @@
+{% extends "base_user.html" %}
+{% block title %}查询订单信息{% endblock %}
+
+{% block card %}<div class="layui-card-header"><h2>我的订单信息</h2></div>{% endblock %}
+{% block body %}
+<div id="remove">
+    <table class="layui-table" id="modify" lay-filter="modify">
+        <thead>
+        <tr>
+            <th lay-data="{field:'cart_id', width:120}">订单编号</th>
+            <th lay-data="{field:'book_id', width:120}">图书编号</th>
+            <th lay-data="{field:'book_name', width:160}">图书名称</th>
+            <th lay-data="{field:'buy_number', sort:true, edit:'text', width:120}">购书数量</th>
+            <th lay-data="{field:'buy_date', sort:true, width:140}">下单日期</th>
+            <th lay-data="{field:'price', sort:true, width:120}">图书单价</th>
+            <th lay-data="{field:'total_price', sort:true, width:120}">总价</th>
+        </tr>
+        </thead>
+
+        <tbody>
+
+        </tbody>
+
+    </table>
+</div>
+
+<table id="test" lay-filter="test">
+
+</table>
+
+{% endblock %}
+
+
+{% block script %}
+<script id="barDemo" type="text/html">
+  <a class="layui-btn layui-btn-danger layui-btn-xs" lay-event="del">删除</a>
+</script>
+
+<script>
+    layui.use(['table','jquery'], function(){
+        var table = layui.table;
+        var $ = layui.$;
+
+        table.init('modify', {
+              height: 390
+              ,limit: 7
+              ,page: true
+        });
+        $.ajax({
+            url:"{{ url_for('main.list_order') }}",
+            type:"get",
+            processData:false,
+            contentType:false,
+            success:function(data){
+                    if (data.length !== 0){
+                        $('#remove').remove();
+                        table.render({
+                            elem: '#test'
+                            ,data:data
+                            ,cols: [[
+                                // {type: 'checkbox', fixed: 'left'} //开启选择框
+                            {field:'cart_id', title:'订单编号', width:120}
+                            ,{field:'book_id', title:'图书编号', width:120}
+                            ,{field:'book_name', title:'图书名称', width:160}
+                            ,{field:'buy_number', title:'购书数量', edit:'text',sort:true, width:120}
+                            ,{field:'buy_date', title:'下单日期',sort:true, width:140}
+                            ,{field:'price', title:'图书单价',sort:true, width:120}
+                            ,{field:'total_price', title:'总价',sort:true, width:120}
+                            ,{fixed: 'right', title:'操作', toolbar: '#barDemo'}
+                            ]]
+                            ,page: true
+                            ,height: 390
+                            ,limit: 7
+                            ,response: {
+                                statusCode: 200 //重新规定成功的状态码为 200，table 组件默认为 0
+                            }
+                            ,parseData: function(data){ //将原始数据解析成 table 组件所规定的数据
+                                return {
+                                    "code": data.status, //解析接口状态
+                                    "msg": data.message, //解析提示文本
+                                    "count": data.total, //解析数据长度
+                                    "data": data.rows.item //解析数据列表
+                                };
+                            }
+                        });
+                        //监听行工具事件-删除操作
+                        table.on('tool(test)', function(obj){
+                            var data = obj.data;
+                            //console.log(obj) //调试输出对象数据
+                            if(obj.event === 'del'){
+                                layer.confirm('真的删除该订单么？', function(index){
+                                    delorder(data,index,obj);
+                                });
+                                function delorder(data,index,obj) {
+                                    $.ajax({
+                                        url:"{{ url_for('main.delete_order') }}",
+                                        type:"POST",
+                                        data:data,
+                                        success: function (data) {
+                                            //接受data为后台是否成功的消息
+                                            if(data === 'success'){
+                                                layer.close(index);
+                                                obj.del();
+                                                layer.msg("删除成功！");
+                                            }
+                                            else {
+                                                layer.msg("删除失败！");
+                                            }
+                                        }
+                                    });
+                                }
+                            }
+                        });
+                        //监听单元格编辑
+                        table.on('edit(test)', function(obj){
+                            var value = obj.value //得到修改后的值
+                                ,data = obj.data //得到所在行所有键值
+                                ,field = obj.field; //得到字段
+                            $.ajax({
+                                url:"{{ url_for('main.edit_order') }}",
+                                type:"POST",
+                                data:{"edit_field":field,"new_value":value,"cart_id": data.cart_id},
+                                success: function (data) {
+                                    if(data === 'ok'){
+                                        layer.msg(field + ' 字段更改为：'+ value);
+                                        //计算更新总价
+                                        var total = value*obj.data.price
+                                        obj.update({total_price: total})
+                                    }
+                                    else if(data === 'case1'){
+                                        layer.msg('该图书已经被管理员下架，订单失效！');
+                                    }
+                                    else if(data === 'case2'){
+                                        layer.msg('库存不足，无法提供所需数目的图书');
+                                    }
+                                    else{
+                                        layer.msg('编辑无效！');
+                                    }
+                                }
+                            })
+                        });
+                    }
+                    else{
+                        layui.use('layer', function(){
+                            var layer = layui.layer;
+                            layer.msg('未找到任何结果',{time: 1000});
+                        });
+                    }
+                }
+        });
+    });
+</script>
+{% endblock %}

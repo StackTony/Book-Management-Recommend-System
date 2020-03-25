@@ -40,13 +40,12 @@
               ,page: true
         });
 
-        $(document).ready(function(){
-            $.ajax({
-                url:"{{ url_for('main.search_order') }}",
-                type:"get",
-                processData:false,
-                contentType:false,
-                success:function(data){
+        $.ajax({
+            url:"{{ url_for('main.search_order') }}",
+            type:"get",
+            processData:false,
+            contentType:false,
+            success:function(data){
                     if (data.length !== 0){
                         $('#remove').remove();
                         table.render({
@@ -89,7 +88,6 @@
 
                 }
             });
-        });
 
     });
 </script>

@@ -72,7 +72,44 @@
               ,limit: 7
               ,page: true
         });
-
+        $.ajax({
+                url:"{{ url_for('main.list_all_book') }}",
+                type:"get",
+                success:function(data){
+                    if(data.length !== 0){
+                        $('#remove').remove();
+                        table.render({
+                        elem: '#test'
+                        ,data:data
+                        ,cols: [[
+                        //{type: 'checkbox', fixed: 'left'} //开启选择框
+                         {field:'book_id', title:'图书编号', width:180}
+                         ,{field:'book_name', title:'图书名', width:180}
+                         ,{field:'author', title:'作者', width:120}
+                         ,{field:'average_rating', title:'评分', sort:true, width:100}
+                         ,{field:'price', title:'价格', sort:true, width:100}
+                         ,{field:'publish_date', title:'出版日期', sort:true, width:120}
+                         ,{field:'publish_name', title:'出版社', width:140}
+                         ,{field:'store_number', title:'库存图书量',sort:true, width:120}
+                         ]]
+                        ,page: true
+                        ,height: 390
+                        ,limit: 7
+                        ,response: {
+                            statusCode: 200 //重新规定成功的状态码为 200，table 组件默认为 0
+                        }
+                        ,parseData: function(data){ //将原始数据解析成 table 组件所规定的数据
+                            return {
+                                "code": data.status, //解析接口状态
+                                "msg": data.message, //解析提示文本
+                                "count": data.total, //解析数据长度
+                                "data": data.rows.item //解析数据列表
+                            };
+                        }
+                    });
+                    }
+                }
+            })
         $(document).ready(function(){
             $('#search').on('click',function () {
                 var form = new FormData(document.getElementById("search_book"));
