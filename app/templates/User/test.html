@@ -1,0 +1,25 @@
+
+{% extends "base_user.html" %}
+{% block card %}
+    <div class="layui-card-header"><h2>订单信息</h2></div>
+{% endblock %}
+
+{% block body %}
+
+<input type="button" value="-" id="del" οnclick="del()"/>
+<span id="quantity">1</span>
+<input type="button" value="+" id="add" οnclick="add()"/>
+{% endblock %}
+
+{% block script %}
+<script>
+    function del(){
+    var num=parseInt($('#quantity').text())-1;
+    if(num<1)
+    {$('#quantity').text(1);}
+    else{$('#quantity').text(num);}}
+    function add()
+    {var num=parseInt($('#quantity').text())+1;
+    $('#quantity').text(num);}
+</script>
+{% endblock %}

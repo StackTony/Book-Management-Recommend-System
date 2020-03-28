@@ -7,13 +7,14 @@
     <table class="layui-table" id="modify" lay-filter="modify">
         <thead>
         <tr>
-            <th lay-data="{field:'cart_id', width:120}">订单编号</th>
+            <th lay-data="{field:'order_id', width:120}">订单编号</th>
             <th lay-data="{field:'book_id', width:120}">图书编号</th>
             <th lay-data="{field:'book_name', width:160}">图书名称</th>
             <th lay-data="{field:'buy_number', sort:true, edit:'text', width:120}">购书数量</th>
             <th lay-data="{field:'buy_date', sort:true, width:140}">下单日期</th>
             <th lay-data="{field:'price', sort:true, width:120}">图书单价</th>
             <th lay-data="{field:'total_price', sort:true, width:120}">总价</th>
+            <th lay-data="{field:'local',edit:'text', width:160}">配送地址</th>
         </tr>
         </thead>
 
@@ -59,13 +60,14 @@
                             ,data:data
                             ,cols: [[
                                 // {type: 'checkbox', fixed: 'left'} //开启选择框
-                            {field:'cart_id', title:'订单编号', width:120}
+                            {field:'order_id', title:'订单编号', width:120}
                             ,{field:'book_id', title:'图书编号', width:120}
                             ,{field:'book_name', title:'图书名称', width:160}
                             ,{field:'buy_number', title:'购书数量', edit:'text',sort:true, width:120}
                             ,{field:'buy_date', title:'下单日期',sort:true, width:140}
                             ,{field:'price', title:'图书单价',sort:true, width:120}
                             ,{field:'total_price', title:'总价',sort:true, width:120}
+                            ,{field:'local', title:'配送地址', edit:'text', width:160}
                             ,{fixed: 'right', title:'操作', toolbar: '#barDemo'}
                             ]]
                             ,page: true
@@ -119,10 +121,10 @@
                             $.ajax({
                                 url:"{{ url_for('main.edit_order') }}",
                                 type:"POST",
-                                data:{"edit_field":field,"new_value":value,"cart_id": data.cart_id},
+                                data:{"edit_field":field,"new_value":value,"order_id": data.order_id},
                                 success: function (data) {
                                     if(data === 'ok'){
-                                        layer.msg(field + ' 字段更改为：'+ value);
+                                        layer.msg(field + ' 更改为：'+ value);
                                         //计算更新总价
                                         var total = value*obj.data.price
                                         obj.update({total_price: total})

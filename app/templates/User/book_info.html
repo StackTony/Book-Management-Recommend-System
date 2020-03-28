@@ -1,0 +1,64 @@
+{% extends "base_user.html" %}
+{% block card %}
+<div class="layui-card-header"><h2>《{{ book['book_name'] }}》</h2></div>
+{% endblock %}
+
+{% block body %}
+<div class="row">
+    <div class="layui-col-md6 layui-col-sm5">
+        <a href="javascript:;">
+            <img src="../../static/icon.jpg" width="450px" height="480px" style="padding-top: 15px;">
+        </a>
+    </div>
+    <div class="layui-col-md6 layui-col-sm5">
+        <form>
+            xiangqing
+        </form>
+        <div style="padding-bottom: 10px;padding-top: 10px">
+            <a href="/discuss_rating?book_id={{book['book_id']}}">
+                <button class="layui-btn layui-btn-sm layui-btn-primary" type="button">
+                    <i class="layui-icon">&#xe611;</i>
+                </button>
+            </a>
+            <a href="/add_order?book_id={{book['book_id']}}">
+                <button class="layui-btn layui-btn-sm layui-btn-primary" type="button">
+                    <i class="layui-icon">&#xe657;</i>
+                </button>
+            </a>
+            <button class="layui-btn layui-btn-sm layui-btn-primary" type="button" id="love">
+
+                {% if book['book_id'] is not in loves %}
+                <i id="kongxin" class="layui-icon" alt="">&#xe600;</i>
+                {% endif %}
+                {% if book['book_id'] in loves %}
+                <i id="shixin" class="layui-icon" alt="" style="color:#FF0000">&#xe658;</i>
+                {% endif %}
+            </button>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block script %}
+
+<script type="text/javascript">
+    $(document).ready(function(){
+        var flag;
+        var loves = loves;
+        $("#kongxin").click(function(){
+            this.style.display = 'none';
+            $("#shixin").style.display = 'block';
+            flag = 1;
+            layer.msg(JSON.stringify(flag));
+
+        });
+        $("#shixin").click(function(){
+            $("#shixin").style.display = 'none';
+            $("#kongxin").style.display = 'block';
+            flag = '0';
+        });
+    });
+</script>
+
+{% endblock %}
+

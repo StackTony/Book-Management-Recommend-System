@@ -3,12 +3,13 @@
 import time, datetime
 import numpy as np
 from flask import render_template, session, redirect, url_for, flash, request, jsonify
+from sqlalchemy import and_
 from flask_login import login_user, logout_user, login_required, current_user, login_manager
 from .form import LoginForm, RegisterForm, SearchUserForm, SearchBookForm, AddNewBookForm, \
     AddBookStoreForm, ChangePasswordForm, UserInfoForm
 from .. import db
 from . import main
-from ..models import User, Admin, Book, Rating, Cart, Inventory
+from ..models import User, Admin, Book, Rating, Orders, Inventory, Favorite
 
 
 # 首页   √
@@ -272,7 +273,7 @@ def list_order_info():
 @login_required
 def search_order():
     data = []
-    orders = Cart.query.all()
+    orders = Orders.query.all()
     for order in orders:
         book_id = order.book_id
         book = Book.query.filter_by(book_id=book_id).first()
@@ -282,7 +283,7 @@ def search_order():
             book_name = book.book_name
             book_price = book.price
             item = {
-                'cart_id': order.cart_id,
+                'order_id': order.order_id,
                 'book_id': book_id,
                 'book_name': book_name,
                 'user_id': user_id,
@@ -390,7 +391,7 @@ def list_user_info():
     users = User.query.all()
     for user in users:
         user_id = user.user_id
-        orders = Cart.query.filter_by(user_id=user_id).all()
+        orders = Orders.query.filter_by(user_id=user_id).all()
         if len(orders) != 0:
             for order in orders:
                 book_id = order.book_id
@@ -405,7 +406,7 @@ def list_user_info():
                     'age': user.age,
                     'local': user.local,
                     'password': user.password,
-                    'cart_id': order.cart_id,
+                    'order_id': order.order_id,
                     'book_id': book_id,
                     'book_name': book_name,
                     'buy_number': order.buy_number,
@@ -423,7 +424,7 @@ def list_user_info():
                 'age': user.age,
                 'local': user.local,
                 'password': user.password,
-                'cart_id': '——',
+                'order_id': '——',
                 'book_id': '——',
                 'book_name': '——',
                 'buy_number': '——',
@@ -506,14 +507,17 @@ def register():
         local = form.local.data
         pwd = form.password.data
         pwd2 = form.password2.data
+        """
+        #用户id若不是自增需要随机产生
         user_id = np.random.randint(0, 100000)
         # 确保产生的user_id作为主键是唯一的
         exist_id = User.query.filter_by(user_id=user_id).first()
         while (exist_id is not None):
             user_id = np.random.randint(0, 100000)
             exist_id = User.query.filter_by(user_id=user_id).first()
+        """
         # 产生新用户，并插入数据库
-        new_user = User(user_id, name, sex, age, local, pwd)
+        new_user = User(name, sex, age, local, pwd)
         if new_user.verify_password(pwd2) is True:
             # db是SQLAlchemy()实例化对象，用于数据库操作
             db.session.add(new_user)
@@ -545,19 +549,267 @@ def book_shop():
     return render_template('/User/book_shop.html', name=session.get('user_name'), books=books)
 
 
-# 下订单
+# 图书详情页
+@main.route('/book_info', methods=['GET', 'POST'])
+@login_required
+def book_info():
+    book_id = request.args.get('book_id')
+    session['book_id'] = book_id  # 将book_id加入当前session
+    book = Book.query.filter_by(book_id=book_id).first()
+    user_id = session['user_id']
+    favorite = Favorite.query.filter_by(user_id=user_id).all()
+    loves = []
+    for favor in favorite:
+        loves.append(favor.book_id)
+    return render_template('/User/book_info.html', name=session.get('user_name'), book=book, loves=loves)
+
+
+# 添加到书架（收藏）
+@main.route('/add_favorite', methods=['GET', 'POST'])
+@login_required
+def add_favorite():
+    data = ''
+    if request.method == 'POST':
+        book_id = session['book_id']
+        user_id = session['user_id']
+        flag = request.values.get('flag')
+        if flag == 1:
+            love = Favorite()
+            love.book_id = book_id
+            love.user_id = user_id
+            db.session.add(love)
+            db.session.commit()
+            data = 'add'
+            # flash(u'添加收藏成功')
+        elif flag == 0:
+            condition1 = (Favorite.book_id == book_id)
+            condition2 = (Favorite.user_id == user_id)
+            love = Favorite.query.filter(and_(condition1, condition2))
+            db.session.delete(love)
+            db.session.commit()
+            data = 'cancel'
+            # flash(u'取消收藏成功')
+    return jsonify(data)
+
+
+#点击后创建订单并返回给前端
+@main.route('/create_order', methods=['GET', 'POST'])
+@login_required
+def create_order():
+    # 产生order_id
+    # id若不是自增需要随机产生
+    order_id = np.random.randint(0, 1000000)
+    # 确保产生的order_id作为主键是唯一的
+    exist_id = Orders.query.filter_by(order_id=order_id).first()
+    while (exist_id is not None):
+        order_id = np.random.randint(0, 1000000)
+        exist_id = Orders.query.filter_by(order_id=order_id).first()
+    session['order_id'] = order_id
+    book_id = session['book_id']
+    book = Book.query.filter_by(book_id=book_id).first()
+
+    order = Orders()
+    order.order_id = order_id
+    order.user_id = session['user_id']
+    order.book_id = book_id
+    order.buy_number = 0
+    order.total_price = float(book.price) * int(order.buy_number)
+    order.buy_date = 'test'
+    order.local = ''
+    # 此时不能加入数据库
+    item = {
+        # 图书信息
+        'book_id': book_id,
+        'book_name': book.book_name,
+        'author': book.author,
+        'price': book.price,
+        'average_rating': book.average_rating,
+        'publish_name': book.publish_name,
+        'publish_date': book.publish_date,
+        'store_number': book.store_number,
+        # 订单信息
+        'order_id': order_id,
+        'buy_number': order.buy_number,
+        'buy_date': order.buy_date,
+        'total_price': order.total_price,
+        'local': order.local
+    }
+    return jsonify(item)
+
+
+# 下订单页
 @main.route('/add_order', methods=['GET', 'POST'])
 @login_required
 def add_order():
-    book_id = request.args.get('book_id') #获取/add_order?book_id=XXX的值
-    return render_template('/User/add_order.html', name=session['user_name'], book_id=book_id)
+    return render_template('/User/add_order.html', name=session['user_name'])
 
 
-# 讨论+评分
+# 获取订单信息
+@main.route('/get_order_info', methods=['GET', 'POST'])
+@login_required
+def get_order_info():
+    book_id = session['book_id']
+    order_id = session['order_id']
+    book = Book.query.filter_by(book_id=book_id).first()
+    order = Orders.query.filter_by(order_id=order_id).first()
+    item = {
+        # 图书信息
+        'book_id': book_id,
+        'book_name': book.book_name,
+        'author': book.author,
+        'price': book.price,
+        'average_rating': book.average_rating,
+        'publish_name': book.publish_name,
+        'publish_date': book.publish_date,
+        'store_number': book.store_number,
+        # 订单信息
+        'order_id': order_id,
+        'buy_number': order.buy_number,
+        'buy_date': order.buy_date,
+        'total_price': order.total_price,
+        'local': order.local
+    }
+    return jsonify(item)
+
+
+# 表单中修改订单（数量+配送地址）
+@main.route('/modify_my_order', methods=['GET', 'POST'])
+@login_required
+def modify_my_order():
+    data = ''
+    if request.method == 'POST':
+        book_id = session['book_id']
+        order_id = session['order_id']
+        user_id = session['user_id']
+        book = Book.query.filter_by(book_id=book_id).first()
+        order = Orders.query.filter_by(order_id=order_id).first()
+
+        local = request.values.get('local')
+        want_buy_number = request.values.get('buy_number')
+        left_store = int(book.store_number)
+
+        if order is None:
+            if book is None:
+                flash('该图书已经被管理员下架，订单失效！')
+                data = 'case1'
+            else:
+                if int(want_buy_number) <= int(left_store):
+                    new_order = Orders()
+                    new_order.order_id = order_id
+                    new_order.user_id = user_id
+                    new_order.book_id = book_id
+                    new_order.buy_date = 'test'
+                    new_order.buy_number = want_buy_number
+                    new_order.local = local
+                    new_order.total_price = int(want_buy_number) * float(book.price)
+                    db.session.add(new_order)
+                    db.session.commit()
+                    data = 'ok1'
+                else:
+                    # 购买的大于库存
+                    flash('库存不足，无法提供所需数目的图书')
+                    data = 'case2'
+        else:
+            old_want_buy_number = order.buy_number
+            opera_num = int(want_buy_number) - int(old_want_buy_number)
+            if int(opera_num) > int(left_store):
+                # 购买的大于库存
+                flash('库存不足，无法提供所需数目的图书')
+                data = 'case2'
+            else:
+                if int(opera_num) < 0:
+                    # 返还书籍入库
+                    book.store_number = left_store + abs(int(opera_num))
+                elif int(opera_num) == int(left_store):
+                    # 全部购买，不能直接删除书籍
+                    book.store_number = 0
+                else:
+                    book.store_number = left_store - abs(int(opera_num))
+
+                order.buy_number = want_buy_number
+                order.local = local
+                order.total_price = int(want_buy_number) * float(book.price)
+                db.session.commit()
+                data = 'ok2'
+                db.session.commit()
+    return jsonify(data)
+
+
+# 列表中编辑修改订单
+@main.route('/edit_order', methods=['GET', 'POST'])
+@login_required
+def edit_order():
+    data = ''
+    if request.method == 'POST':
+        order_id = request.values.get('order_id')
+        field = request.values.get('edit_field')
+        value = request.values.get('new_value')
+        order = Orders.query.filter_by(order_id=order_id).first()
+        old_value = order.buy_number
+        if order is not None:
+            book_id = order.book_id
+            book = Book.query.filter_by(book_id=book_id).first()
+            if book is None:
+                flash('该图书已经被管理员下架，订单失效！')
+                data = 'case1'
+                db.session.delete(order)
+                db.session.commit()
+
+            elif field == 'buy_number':
+                price = book.price
+                left_store = book.store_number
+                opera_num = int(value) - int(old_value)
+                if int(opera_num) > int(left_store):
+                    # 购买的大于库存
+                    flash('库存不足，无法提供所需数目的图书')
+                    data = 'case2'
+                else:
+                    if int(opera_num) < 0:
+                        # 返还书籍入库
+                        book.store_number = left_store + abs(int(opera_num))
+                    elif int(opera_num) == int(left_store):
+                        # 全部购买，不能直接删除书籍
+                        book.store_number = 0
+                    else:
+                        book.store_number = left_store - abs(int(opera_num))
+
+                    order.buy_number = value
+                    order.total_price = int(value) * float(price)
+                    db.session.commit()
+                    data = 'ok'
+            elif field == 'local':
+                order.local = value;
+                db.session.commit()
+                data = 'ok'
+
+    return jsonify(data)
+
+
+# 获取图书信息
+@main.route('/get_book_info', methods=['GET', 'POST'])
+@login_required
+def get_book_info():
+    book_id = session['book_id']
+    book = Book.query.filter_by(book_id=book_id).first()
+    item = {
+        # 图书信息
+        'book_id': book_id,
+        'book_name': book.book_name,
+        'author': book.author,
+        'price': book.price,
+        'average_rating': book.average_rating,
+        'publish_name': book.publish_name,
+        'publish_date': book.publish_date,
+        'store_number': book.store_number
+    }
+    return jsonify(item)
+
+
+# 讨论+评分页
 @main.route('/discuss_rating', methods=['GET', 'POST'])
 @login_required
 def discuss_rating():
-    book_id = request.args.get('book_id') #获取/add_order?book_id=XXX的值
+    book_id = request.args.get('book_id')  # 获取/add_order?book_id=XXX的值
     return render_template('/User/discuss_rating.html', name=session['user_name'], book_id=book_id)
 
 
@@ -618,7 +870,7 @@ def order_info():
 def list_order():
     data = []
     user_id = session['user_id']
-    orders = Cart.query.filter_by(user_id=user_id).all()
+    orders = Orders.query.filter_by(user_id=user_id).all()
     for order in orders:
         book_id = order.book_id
         book = Book.query.filter_by(book_id=book_id).first()
@@ -627,7 +879,7 @@ def list_order():
             book_price = book.price
             user_name = User.query.filter_by(user_id=user_id).first().user_name
             item = {
-                'cart_id': order.cart_id,
+                'order_id': order.order_id,
                 'book_id': book_id,
                 'book_name': book_name,
                 'user_id': user_id,
@@ -635,7 +887,8 @@ def list_order():
                 'buy_number': order.buy_number,
                 'buy_date': order.buy_date,
                 'price': book_price,
-                'total_price': order.total_price
+                'total_price': order.total_price,
+                'local': order.local
             }
             data.append(item)
     return jsonify(data)
@@ -647,63 +900,18 @@ def list_order():
 def delete_order():
     data = ''
     if request.method == 'POST':
-        cart_id = request.values.get('cart_id')
-        cart = Cart.query.filter_by(cart_id=cart_id).first()
-        if cart is not None:
+        order_id = request.values.get('order_id')
+        order = Orders.query.filter_by(order_id=order_id).first()
+        if order is not None:
             # 回退库存数目
-            book_id = cart.book_id
-            number = cart.buy_number
+            book_id = order.book_id
+            number = order.buy_number
             book = Book.query.filter_by(book_id=book_id).first()
             book.store_number = book.store_number + number
 
-            db.session.delete(cart)
+            db.session.delete(order)
             db.session.commit()
             data = 'success'
-    return jsonify(data)
-
-
-# 编辑修改订单
-@main.route('/edit_order', methods=['GET', 'POST'])
-@login_required
-def edit_order():
-    data = ''
-    if request.method == 'POST':
-        cart_id = request.values.get('cart_id')
-        field = request.values.get('edit_field')
-        value = request.values.get('new_value')
-        cart = Cart.query.filter_by(cart_id=cart_id).first()
-        old_value = cart.buy_number
-        if cart is not None:
-            book_id = cart.book_id
-            book = Book.query.filter_by(book_id=book_id).first()
-            if book is None:
-                flash('该图书已经被管理员下架，订单失效！')
-                data = 'case1'
-                db.session.delete(cart)
-                db.session.commit()
-
-            elif field == 'buy_number':
-                price = book.price
-                left_store = book.store_number
-                opera_num = int(value) - int(old_value)
-                if int(opera_num) > int(left_store):
-                    # 购买的大于库存
-                    flash('库存不足，无法提供所需数目的图书')
-                    data = 'case2'
-                else:
-                    if int(opera_num) < 0:
-                        # 返还书籍入库
-                        book.store_number = left_store + abs(int(opera_num))
-                    elif int(opera_num) == int(left_store):
-                        # 全部购买，不能直接删除书籍
-                        book.store_number = 0
-                    else:
-                        book.store_number = left_store - abs(int(opera_num))
-
-                    cart.buy_number = value
-                    cart.total_price = int(value) * float(price)
-                    db.session.commit()
-                    data = 'ok'
     return jsonify(data)
 
 

@@ -53,24 +53,24 @@
         form.on('submit(modify)',function (data) {
             //layer.msg(JSON.stringify(data.field));
             $.ajax({
-            url:"{{ url_for('main.modify_my_info') }}",
-            type: "post",
-            data: {
-                "user_name": data.field['user_name'],
-                "sex": data.field['sex'],
-                "age": data.field['age'],
-                "local": data.field['local']
-            },
-            success:function (data) {
-                if(data == 'success') {
-                    layer.msg('保存成功！')
-                }
-                else{
-                    layer.msg('修改失败！')
-                }
+                url:"{{ url_for('main.modify_my_info') }}",
+                method: "post",
+                data: {
+                    "user_name": data.field['user_name'],
+                    "sex": data.field['sex'],
+                    "age": data.field['age'],
+                    "local": data.field['local']
+                },
+                success:function (data) {
+                    if(data == 'success') {
+                        layer.msg('保存成功！')
+                    }
+                    else{
+                        layer.msg('修改失败！')
+                    }
 
-            }
-        })
+                }
+            })
             return false
         })
 

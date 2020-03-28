@@ -18,15 +18,14 @@ from flask_login import UserMixin
 """
 class User(UserMixin, db.Model):
     __tablename__ = 'user'
-    user_id = db.Column(db.Integer,primary_key=True)
+    user_id = db.Column(db.Integer,primary_key=True,autoincrement=True)
     user_name = db.Column(db.String(32))
     sex = db.Column(db.String(10))
     age = db.Column(db.Integer)
     local = db.Column(db.String(30))
     password = db.Column(db.String(24))
 
-    def __init__(self, user_id, user_name, sex, age, local, password):
-        self.user_id = user_id
+    def __init__(self,user_name, sex, age, local, password):
         self.user_name = user_name
         self.sex = sex
         self.age = age
@@ -53,7 +52,7 @@ class User(UserMixin, db.Model):
 """
 class Admin(UserMixin, db.Model):
     __tablename__ = 'admin'
-    admin_id = db.Column(db.Integer, primary_key=True)
+    admin_id = db.Column(db.Integer, primary_key=True,autoincrement=True)
     admin_name = db.Column(db.String(32))
     password = db.Column(db.String(24))
 
@@ -100,6 +99,21 @@ class Book(db.Model):
         return '<Book %r>' % self.book_name
 
 """
+收藏表 Favorite
+*ID（主）
+*用户编号ID
+*图书编号ID
+"""
+class Favorite(db.Model):
+    __tablename__ = 'favorite'
+    id = db.Column(db.Integer, primary_key=True,autoincrement=True)
+    user_id = db.Column(db.Integer)
+    book_id = db.Column(db.String(13))
+
+    def __repr__(self):
+        return '<Favorite %r>' % self.is_favorite
+
+"""
 评分表 Rating（评分代表用户书架上有该书）
 *评分编号ID（主）
 *用户编号ID（外）
@@ -108,7 +122,7 @@ class Book(db.Model):
 """
 class Rating(db.Model):
     __tablename__ = 'rating'
-    rating_id = db.Column(db.String(10),primary_key=True)
+    rating_id = db.Column(db.Integer,primary_key=True,autoincrement=True)
     user_id = db.Column(db.ForeignKey('user.user_id'))
     book_id = db.Column(db.ForeignKey('book.book_id'))
     rate = db.Column(db.Integer)
@@ -124,18 +138,20 @@ class Rating(db.Model):
 *下单时间
 *订购数量
 *总价
+*配送地址
 """
-class Cart(db.Model):
-    __tablename__ =  'cart'
-    cart_id = db.Column(db.String(10), primary_key=True)
+class Orders(db.Model):
+    __tablename__ =  'orders'
+    order_id = db.Column(db.Integer, primary_key=True)
     user_id = db.Column(db.Integer)
     book_id = db.Column(db.String(13))
     buy_number = db.Column(db.Integer)
     buy_date = db.Column(db.String(20))
     total_price = db.Column(db.Float(5))
+    local = db.Column(db.String(50))
 
     def __repr__(self):
-        return '<Cart %r>' % self.cart_id
+        return '<Cart %r>' % self.order_id
 
 """
 库存操作清单 Inventory

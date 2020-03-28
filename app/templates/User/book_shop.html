@@ -4,7 +4,7 @@
 {% endblock %}
 
 {% block body %}
-<div class="row" >
+<div class="row">
     <!--
             {% for book in books %}
                 <div class="col-sm-4 col-md-3">
@@ -32,9 +32,11 @@
             <div class="layui-col-md3 layui-col-sm5">
                 <div class="cmdlist-container layui-bg-gray" style="text-align: center">
                     <a href="javascript:;">
-                        <img src="../../static/icon.jpg" width="200px" style="padding-top: 15px;">
+                        <a href="/book_info?book_id={{book['book_id']}}">
+                            <img src="../../static/icon.jpg" width="200px" style="padding-top: 15px;">
+                        </a>
                     </a>
-                    <a href="javascript:;">
+                    <a href="/book_info?book_id={{book['book_id']}}">
                         <div class="cmdlist-text" style="padding-top: 10px">
                             <b id="bookid"> {{book['book_id']}} </b>
                             <b class="bookname" style="font-size: medium;">《{{book['book_name']}}》</b>
@@ -44,20 +46,10 @@
                             <div class="rating">
                                 <p>评分：{{ book['average_rating'] }}</p>
                             </div>
-                            <div class="price">
+                            <div class="price" style="padding-bottom: 10px;">
                                 <p>单价 ￥{{ book['price'] }}元</p>
                             </div>
-                            <div style="padding-bottom: 10px;">
-                                <button class="layui-btn layui-btn-sm layui-btn-primary" type="button">
-                                    <a href="/discuss_rating?book_id={{book['book_id']}}"><i class="layui-icon" >&#xe611;</i></a>
-                                </button>
-                                <button class="layui-btn layui-btn-sm layui-btn-primary" type="button" id="order">
-                                    <a href="/add_order?book_id={{book['book_id']}}"><i class="layui-icon">&#xe657;</i></a>
-                                </button>
-                                <button class="layui-btn layui-btn-sm layui-btn-primary" type="button">
-                                    <i class="layui-icon">&#xe600;</i>
-                                </button>
-                            </div>
+
                         </div>
                     </a>
                 </div>
@@ -69,21 +61,53 @@
 {% endblock %}
 
 {% block script %}
-<script>
-    layui.use(['jquery'], function () {
-        var $ = layui.$;
-        $(document).ready(function() {
-            $("#order").on('click', function (book) {
-                window.location.href="{{ url_for('main.add_order', book_id=12345678900002) }}";
-                $.ajax({
-                    type: "POST",
-                    url: "/add_order",
-                    data: { "book_id": book['book_id'] },
-                });
+<style type="text/css">
+    #shixin{
+        display:none;
+    }
+</style>
+<script type="text/javascript">
 
-            })
-        });
-    });
+    var kongxin = document.getElementById("kongxin");
+    var shixin = document.getElementById("shixin");
+    var flag;
+    //空心点击变实心
+    kongxin.onclick=function(){
+
+        this.style.display = 'none';
+        shixin.style.display = 'block';
+        flag = '1';
+        alert(flag);
+
+    }
+    //实心点击变空心
+    shixin.onclick=function(){
+        this.style.display = 'none';
+      kongxin.style.display = 'block';
+      flag = '0';
+      alert(flag);
+  }
+$.ajax({
+      url:"{{ url_for('main.add_favorite') }}",
+      type: "POST",
+      data: {"flag": flag},
+      success:function (data) {
+          if(data == 'add') {
+              layer.msg('收藏成功！')
+          }
+          elif(data == 'add_lost'){
+              layer.msg('收藏失败！')
+          }
+          elif(data == 'cancel') {
+              layer.msg('取消收藏成功！')
+          }
+          elif(data == 'cancel_lost'){
+              layer.msg('取消收藏失败！')
+          }
+      }
+  })
+
 
 </script>
+
 {% endblock %}
