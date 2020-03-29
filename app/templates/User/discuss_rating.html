@@ -1,11 +1,14 @@
 {% extends "base_user.html" %}
 {% block card %}
-<div class="layui-card-header"><h2>《{{ book['book_name'] }}》</h2></div>
+<div class="layui-card-header">
+    <h2>《{{ book['book_name'] }}》</h2>
+    <p>图书编号：{{ book['book_id'] }} &nbsp &nbsp 总体评分：{{ book['average_rating'] }}  </p>
+</div>
 {% endblock %}
 
 {% block body %}
 <form class="layui-form" action="">
-    <fieldset class="layui-elem-field layui-field-title" style="margin-top: 30px;">
+    <fieldset class="layui-elem-field layui-field-title" style="margin-top: 50px;">
         <legend>图书评论</legend>
 
         <div class="layui-form-item layui-form-text">

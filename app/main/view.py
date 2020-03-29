@@ -484,18 +484,6 @@ def find_user():
 
 ###########################用户功能区#############################
 
-"""
-#图框
-#顶部：        用户注册
-#分列：  用户名：【请输入用户名】
-#         性别：o男  o女
-#         年龄：【】
-#         位置：【】
-#         密码：【请输入密码】
-#       确认密码：【请确认密码】
-#底部：          注册
-"""
-
 
 # 用户-注册   √
 @main.route('/register', methods=['GET', 'POST'])
@@ -568,7 +556,7 @@ def book_info():
         love = '1'
     else:
         love = '0'
-    return render_template('/User/book_info.html', name=session.get('user_name'), book=book, love = love)
+    return render_template('/User/book_info.html', name=session.get('user_name'), book=book, love=love)
 
 
 # 添加到书架（收藏）
@@ -602,7 +590,8 @@ def add_favorite():
             # flash(u'取消收藏成功')
     return jsonify(data)
 
-#点击后创建订单并返回给前端
+
+# 点击后创建订单并返回给前端
 @main.route('/create_order', methods=['GET', 'POST'])
 @login_required
 def create_order():
@@ -654,6 +643,17 @@ def add_order():
     return render_template('/User/add_order.html', name=session['user_name'])
 
 
+# 订单详情页
+@main.route('/order_info', methods=['GET', 'POST'])
+@login_required
+def order_info():
+    order_id = request.args.get('order_id')
+    order = Orders.query.filter_by(order_id=order_id).first()
+    session['order_id'] = order_id
+    session['book_id'] = order.book_id
+    return render_template('/User/order_info.html', name=session['user_name'], order=order)
+
+
 # 获取订单信息
 @main.route('/get_order_info', methods=['GET', 'POST'])
 @login_required
@@ -700,7 +700,7 @@ def modify_my_order():
 
         if order is None:
             if book is None:
-                #flash('该图书已经被管理员下架，订单失效！')
+                # flash('该图书已经被管理员下架，订单失效！')
                 data = 'case1'
             else:
                 if int(want_buy_number) <= int(left_store):
@@ -717,14 +717,14 @@ def modify_my_order():
                     data = 'ok1'
                 else:
                     # 购买的大于库存
-                    #flash('库存不足，无法提供所需数目的图书')
+                    # flash('库存不足，无法提供所需数目的图书')
                     data = 'case2'
         else:
             old_want_buy_number = order.buy_number
             opera_num = int(want_buy_number) - int(old_want_buy_number)
             if int(opera_num) > int(left_store):
                 # 购买的大于库存
-                #flash('库存不足，无法提供所需数目的图书')
+                # flash('库存不足，无法提供所需数目的图书')
                 data = 'case2'
             else:
                 if int(opera_num) < 0:
@@ -760,7 +760,7 @@ def edit_order():
             book_id = order.book_id
             book = Book.query.filter_by(book_id=book_id).first()
             if book is None:
-                #flash('该图书已经被管理员下架，订单失效！')
+                # flash('该图书已经被管理员下架，订单失效！')
                 data = 'case1'
                 db.session.delete(order)
                 db.session.commit()
@@ -771,7 +771,7 @@ def edit_order():
                 opera_num = int(value) - int(old_value)
                 if int(opera_num) > int(left_store):
                     # 购买的大于库存
-                    #flash('库存不足，无法提供所需数目的图书')
+                    # flash('库存不足，无法提供所需数目的图书')
                     data = 'case2'
                 else:
                     if int(opera_num) < 0:
@@ -869,10 +869,10 @@ def modify_my_info():
 
 
 # 我的账户-查看用户订单信息（可编辑修改订单购买数量和删除订单）  √
-@main.route('/order_info', methods=['GET', 'POST'])
+@main.route('/all_order_info', methods=['GET', 'POST'])
 @login_required
-def order_info():
-    return render_template('/User/order_info.html', name=session.get('user_name'))
+def all_order_info():
+    return render_template('/User/all_order_info.html', name=session.get('user_name'))
 
 
 # 将搜索到的用户的订单信息返回前台
@@ -951,15 +951,6 @@ def change_password():
 
 
 ##############################用户/管理员公用区##############################
-
-"""
-#图框
-#顶部：          登录
-#分列：  用户名：【请输入用户名】
-#        密码：【请输入密码】
-#底部：          登录
-#底部：   忘记密码（请联系管理员）
-"""
 
 
 # 用户/管理员-登录   √
