@@ -1,12 +1,12 @@
 {% extends 'base_admin.html' %}
 {% block title %}库存管理{% endblock %}
 {% block card %}
-    <div class="layui-card-header">
-        <h2>新书登记</h2>
-        <button class="layui-btn layui-btn-lg" style="float:right;margin-top:-50px;margin-right:40px;" id="add_book_store">
-            <i class="layui-icon">&#xe608;</i>库存补充
-        </button>
-    </div>
+<div class="layui-card-header">
+    <h2>新书登记</h2>
+    <button class="layui-btn layui-btn-lg" style="float:right;margin-top:-50px;margin-right:40px;" id="add_book_store">
+        <i class="layui-icon">&#xe608;</i>库存补充
+    </button>
+</div>
 {% endblock %}
 
 {% block body %}
@@ -60,14 +60,14 @@
 
 {% block script %}
 <script type="text/javascript">
-    layui.use(['form','jquery'], function () {
+    layui.use(['form', 'jquery'], function () {
         var form = layui.form;
         var $ = layui.$;
 
     });
-     $(document).ready(function(){
-        $("#add_book_store").on('click',function () {
-            window.location.href="{{ url_for('main.add_book_store') }}";
+    $(document).ready(function () {
+        $("#add_book_store").on('click', function () {
+            window.location.href = "{{ url_for('main.add_book_store') }}";
         })
     });
 

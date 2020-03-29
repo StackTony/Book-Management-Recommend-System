@@ -5,27 +5,6 @@
 
 {% block body %}
 <div class="row">
-    <!--
-            {% for book in books %}
-                <div class="col-sm-4 col-md-3">
-                    <div class="thumbnail">
-                        <a href="/bookinfo?bookid={{ book[2] }}">
-                            <img style="width: 100%; height: 200px; display: block;" alt="100%x200" src="{{ book[3] }}">
-                        </a>
-                        <div class="caption center">
-                            <p>{{ book[0] }}</p>
-                            {% if name=="recommend" %}
-                            <p><span>推荐分:</span><span>{{ book[4] }}</span></p>
-                            {% else %}
-                            <p><span>作者:</span><span>{{ book[1] }}</span></p>
-                            {% endif %}
-                            <p><a href="/bookinfo?bookid={{ book[2] }}" bookid="{{ book[2] }}"
-                                  class="btn btn-primary btn-block" role="button">查看详情</a></p>
-                        </div>
-                    </div>
-                </div>
-            {% endfor %}
-     -->
     <div class="layui-fluid layadmin-cmdlist-fluid ">
         <div class="layui-row layui-col-space30">
             {% for book in books %}
@@ -61,53 +40,5 @@
 {% endblock %}
 
 {% block script %}
-<style type="text/css">
-    #shixin{
-        display:none;
-    }
-</style>
-<script type="text/javascript">
-
-    var kongxin = document.getElementById("kongxin");
-    var shixin = document.getElementById("shixin");
-    var flag;
-    //空心点击变实心
-    kongxin.onclick=function(){
-
-        this.style.display = 'none';
-        shixin.style.display = 'block';
-        flag = '1';
-        alert(flag);
-
-    }
-    //实心点击变空心
-    shixin.onclick=function(){
-        this.style.display = 'none';
-      kongxin.style.display = 'block';
-      flag = '0';
-      alert(flag);
-  }
-$.ajax({
-      url:"{{ url_for('main.add_favorite') }}",
-      type: "POST",
-      data: {"flag": flag},
-      success:function (data) {
-          if(data == 'add') {
-              layer.msg('收藏成功！')
-          }
-          elif(data == 'add_lost'){
-              layer.msg('收藏失败！')
-          }
-          elif(data == 'cancel') {
-              layer.msg('取消收藏成功！')
-          }
-          elif(data == 'cancel_lost'){
-              layer.msg('取消收藏失败！')
-          }
-      }
-  })
-
-
-</script>
 
 {% endblock %}

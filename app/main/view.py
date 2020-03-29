@@ -15,6 +15,7 @@ from ..models import User, Admin, Book, Rating, Orders, Inventory, Favorite
 # 首页   √
 @main.route('/', methods=['GET', 'POST'])
 def index():
+    session.clear()
     session['admin_id'] = ''
     session['admin_name'] = ''
     session['user_id'] = ''
@@ -561,7 +562,13 @@ def book_info():
     loves = []
     for favor in favorite:
         loves.append(favor.book_id)
-    return render_template('/User/book_info.html', name=session.get('user_name'), book=book, loves=loves)
+
+    love = '0'
+    if book_id in loves:
+        love = '1'
+    else:
+        love = '0'
+    return render_template('/User/book_info.html', name=session.get('user_name'), book=book, love = love)
 
 
 # 添加到书架（收藏）
@@ -569,28 +576,31 @@ def book_info():
 @login_required
 def add_favorite():
     data = ''
+
     if request.method == 'POST':
         book_id = session['book_id']
         user_id = session['user_id']
-        flag = request.values.get('flag')
-        if flag == 1:
+        flag = request.values.get('love')
+        if flag == '1':
             love = Favorite()
             love.book_id = book_id
             love.user_id = user_id
+
             db.session.add(love)
             db.session.commit()
             data = 'add'
             # flash(u'添加收藏成功')
-        elif flag == 0:
+        elif flag == '0':
             condition1 = (Favorite.book_id == book_id)
             condition2 = (Favorite.user_id == user_id)
-            love = Favorite.query.filter(and_(condition1, condition2))
+            love = Favorite.query.filter(and_(condition1, condition2)).first()
+            if love is None:
+                flag = 'fuck'
             db.session.delete(love)
             db.session.commit()
             data = 'cancel'
             # flash(u'取消收藏成功')
     return jsonify(data)
-
 
 #点击后创建订单并返回给前端
 @main.route('/create_order', methods=['GET', 'POST'])
@@ -690,7 +700,7 @@ def modify_my_order():
 
         if order is None:
             if book is None:
-                flash('该图书已经被管理员下架，订单失效！')
+                #flash('该图书已经被管理员下架，订单失效！')
                 data = 'case1'
             else:
                 if int(want_buy_number) <= int(left_store):
@@ -707,14 +717,14 @@ def modify_my_order():
                     data = 'ok1'
                 else:
                     # 购买的大于库存
-                    flash('库存不足，无法提供所需数目的图书')
+                    #flash('库存不足，无法提供所需数目的图书')
                     data = 'case2'
         else:
             old_want_buy_number = order.buy_number
             opera_num = int(want_buy_number) - int(old_want_buy_number)
             if int(opera_num) > int(left_store):
                 # 购买的大于库存
-                flash('库存不足，无法提供所需数目的图书')
+                #flash('库存不足，无法提供所需数目的图书')
                 data = 'case2'
             else:
                 if int(opera_num) < 0:
@@ -750,7 +760,7 @@ def edit_order():
             book_id = order.book_id
             book = Book.query.filter_by(book_id=book_id).first()
             if book is None:
-                flash('该图书已经被管理员下架，订单失效！')
+                #flash('该图书已经被管理员下架，订单失效！')
                 data = 'case1'
                 db.session.delete(order)
                 db.session.commit()
@@ -761,7 +771,7 @@ def edit_order():
                 opera_num = int(value) - int(old_value)
                 if int(opera_num) > int(left_store):
                     # 购买的大于库存
-                    flash('库存不足，无法提供所需数目的图书')
+                    #flash('库存不足，无法提供所需数目的图书')
                     data = 'case2'
                 else:
                     if int(opera_num) < 0:
@@ -810,7 +820,8 @@ def get_book_info():
 @login_required
 def discuss_rating():
     book_id = request.args.get('book_id')  # 获取/add_order?book_id=XXX的值
-    return render_template('/User/discuss_rating.html', name=session['user_name'], book_id=book_id)
+    book = Book.query.filter_by(book_id=book_id).first()
+    return render_template('/User/discuss_rating.html', name=session['user_name'], book=book)
 
 
 # 我的账户-查看用户个人信息（可编辑修改基本信息，不含密码的修改）  √
@@ -939,7 +950,7 @@ def change_password():
     return render_template('/User/change_password.html', name=session.get('user_name'), form=form)
 
 
-#######################用户/管理员公用区###########################
+##############################用户/管理员公用区##############################
 
 """
 #图框

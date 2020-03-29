@@ -1,101 +1,55 @@
 {% extends "base_user.html" %}
 {% block card %}
-<div class="layui-card-header"><h2>订单信息</h2></div>
+<div class="layui-card-header"><h2>《{{ book['book_name'] }}》</h2></div>
 {% endblock %}
 
 {% block body %}
+<form class="layui-form" action="">
+    <fieldset class="layui-elem-field layui-field-title" style="margin-top: 30px;">
+        <legend>图书评论</legend>
 
-<table id="tab">
+        <div class="layui-form-item layui-form-text">
+            <div class="layui-input-block">
+                <textarea name="comment" placeholder="请输入内容" class="layui-textarea"
+                          style="margin-left: -60px; margin-top: 20px"></textarea>
+            </div>
+        </div>
+        <div class="layui-form-item">
+            <div class="layui-input-block" style="margin-top: 20px; margin-left: 50px">
+                <button class="layui-btn" lay-submit lay-filter="discuss">发表</button>
+                <button type="reset" class="layui-btn layui-btn-primary">重置</button>
+            </div>
+        </div>
+    </fieldset>
 
-    <tr>
+    <fieldset class="layui-elem-field layui-field-title" style="margin-top: 30px;">
+        <legend>图书评分</legend>
+    </fieldset>
+    <div id="rating" style="margin-left: 50px"></div>
 
-        <td>
-
-            <span>单价:</span><span class="price">1.50</span>
-
-            <input class="min" name="" type="button" value="-"/>
-
-            <input class="text_box" name="" type="text" value="1"/>
-
-            <input class="add" name="" type="button" value="+"/>
-
-        </td>
-
-    </tr>
-
-    <tr>
-
-        <td>
-
-            <span>单价:</span><span class="price">3.95</span>
-
-            <input class="min" name="" type="button" value="-"/>
-
-            <input class="text_box" disabled name="" type="text" value="1"/>
-
-            <input class="add" name="" type="button" value="+"/>
-
-        </td>
-
-    </tr>
-
-</table>
-
-
-<p>总价：<label id="total"></label></p>
+</form>
 {% endblock %}
 
 {% block script %}
 <script>
 
-$(function(){
+    layui.use(['layer', 'rate', 'form'], function () {
+        var form = layui.form;
+        var rate = layui.rate;
+        //半星效果
+        rate.render({
+            elem: '#rating'
+            , value: 2.5 //初始值
+            , length: 10
+            , text: true
+            , half: true //开启半星
+        })
 
-$(".add").click(function(){
-
-var t=$(this).parent().find('input[class*=text_box]');
-
-t.val(parseInt(t.val())+1)
-
-setTotal();
-
-})
-
-$(".min").click(function(){
-
-var t=$(this).parent().find('input[class*=text_box]');
-
-t.val(parseInt(t.val())-1)
-
-if(parseInt(t.val())<0){
-
-t.val(0);
-
-}
-
-setTotal();
-
-})
-
-function setTotal(){
-
-var s=0;
-
-$("#tab td").each(function(){
-
-s+=parseInt($(this).find('input[class*=text_box]').val())*parseFloat($(this).find('span[class*=price]').text());
-
-});
-
-$("#total").html(s.toFixed(2));
-
-}
-
-setTotal();
-
-
-
-})
-
-
+        //监听提交
+        form.on('submit(discuss)', function (data) {
+            layer.msg(JSON.stringify(data.field));
+            return false;
+        });
+    });
 </script>
 {% endblock %}

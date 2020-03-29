@@ -1,7 +1,8 @@
 {% extends "base_admin.html" %}
 {% block title %}查询图书库存操作信息{% endblock %}
 
-{% block card %}<div class="layui-card-header"><h2>历史图书库存操作信息</h2></div>{% endblock %}
+{% block card %}
+<div class="layui-card-header"><h2>历史图书库存操作信息</h2></div>{% endblock %}
 {% block body %}
 <div id="remove">
     <table lay-even id="result" lay-filter="re">
@@ -23,49 +24,49 @@
 
     </table>
 </div>
-<table id="test" lay-filter="test"> </table>
+<table id="test" lay-filter="test"></table>
 {% endblock %}
 
 {% block script %}
 <script>
-    layui.use(['table','jquery'], function(){
+    layui.use(['table', 'jquery'], function () {
         var table = layui.table;
         var $ = layui.$;
 
         table.init('re', {
-              height: 390
-              ,limit: 7
-              ,page: true
+            height: 390
+            , limit: 7
+            , page: true
         });
 
-        $(document).ready(function(){
+        $(document).ready(function () {
             $.ajax({
-                url:"{{ url_for('main.search_operation') }}",
-                type:"get",
-                processData:false,
-                contentType:false,
-                success:function(data){
-                    if (data.length !== 0){
+                url: "{{ url_for('main.search_operation') }}",
+                type: "get",
+                processData: false,
+                contentType: false,
+                success: function (data) {
+                    if (data.length !== 0) {
                         $('#remove').remove();
                         table.render({
                             elem: '#test'
-                            ,data:data
-                            ,cols: [[
-                                {field:'bar_id', title:'操作的系统编号', width:160}
-                                ,{field:'book_id', title:'图书编号', width:160}
-                                ,{field:'book_name', title:'图书名', width:180}
-                                ,{field:'admin_name', title:'操作的管理员',sort:true,  width:160}
-                                ,{field:'storage_number', title:'库存数目变动',sort:true,  width:160}
-                                ,{field:'storage_date', title:'操作日期',sort:true,  width:120}
-                                ,{field:'location', title:'本批次图书存放位置',sort:true,  width:180}
-                                ]]
-                            ,page: true
-                            ,height: 390
-                            ,limit: 7
-                            ,response: { //重新规定成功的状态码为 200，table 组件默认为 0
+                            , data: data
+                            , cols: [[
+                                {field: 'bar_id', title: '操作的系统编号', width: 160}
+                                , {field: 'book_id', title: '图书编号', width: 160}
+                                , {field: 'book_name', title: '图书名', width: 180}
+                                , {field: 'admin_name', title: '操作的管理员', sort: true, width: 160}
+                                , {field: 'storage_number', title: '库存数目变动', sort: true, width: 160}
+                                , {field: 'storage_date', title: '操作日期', sort: true, width: 120}
+                                , {field: 'location', title: '本批次图书存放位置', sort: true, width: 180}
+                            ]]
+                            , page: true
+                            , height: 390
+                            , limit: 7
+                            , response: { //重新规定成功的状态码为 200，table 组件默认为 0
                                 statusCode: 200
                             }
-                            ,parseData: function(data){ //将原始数据解析成 table 组件所规定的数据
+                            , parseData: function (data) { //将原始数据解析成 table 组件所规定的数据
                                 return {
                                     "code": data.status, //解析接口状态
                                     "msg": data.message, //解析提示文本
@@ -74,12 +75,11 @@
                                 };
                             }
                         });
-                    }
-                    else{
-                        layui.use('layer', function(){
+                    } else {
+                        layui.use('layer', function () {
                             var layer = layui.layer;
 
-                            layer.msg('未找到任何结果',{time: 1000});
+                            layer.msg('未找到任何结果', {time: 1000});
                         });
                     }
 

@@ -1,6 +1,6 @@
 {% extends "base_user.html" %}
 {% block card %}
-    <div class="layui-card-header"><h2>个人信息</h2></div>
+<div class="layui-card-header"><h2>个人信息</h2></div>
 {% endblock %}
 
 {% block body %}
@@ -47,13 +47,13 @@
 
 {% block script %}
 <script>
-    layui.use(['table','jquery'], function(){
+    layui.use(['table', 'jquery'], function () {
         var form = layui.form;
         var $ = layui.$;
-        form.on('submit(modify)',function (data) {
+        form.on('submit(modify)', function (data) {
             //layer.msg(JSON.stringify(data.field));
             $.ajax({
-                url:"{{ url_for('main.modify_my_info') }}",
+                url: "{{ url_for('main.modify_my_info') }}",
                 method: "post",
                 data: {
                     "user_name": data.field['user_name'],
@@ -61,11 +61,11 @@
                     "age": data.field['age'],
                     "local": data.field['local']
                 },
-                success:function (data) {
-                    if(data == 'success') {
+                success: function (data) {
+                    if (data == 'success') {
                         layer.msg('保存成功！')
-                    }
-                    else{
+
+                    } else {
                         layer.msg('修改失败！')
                     }
 
@@ -75,11 +75,11 @@
         })
 
         $.ajax({
-            url:"{{ url_for('main.get_my_info') }}",
-            type:"get",
-            processData:false,
-            contentType:false,
-            success:function(data) {
+            url: "{{ url_for('main.get_my_info') }}",
+            type: "get",
+            processData: false,
+            contentType: false,
+            success: function (data) {
                 //alert(JSON.stringify(data));
                 //显示基本信息
                 form.val('show', {
@@ -87,7 +87,7 @@
                     "sex": data['sex'],
                     "age": data['age'],
                     "local": data['local'],
-                    "password":  data['password']
+                    "password": data['password']
                 });
             }
 
