@@ -9,7 +9,7 @@ from .form import LoginForm, RegisterForm, SearchUserForm, SearchBookForm, AddNe
     AddBookStoreForm, ChangePasswordForm, UserInfoForm
 from .. import db
 from . import main
-from ..models import User, Admin, Book, Rating, Orders, Inventory, Favorite
+from ..models import User, Admin, Book, Rating, Orders, Inventory, Favorite, Comment
 
 
 # 首页   √
@@ -559,12 +559,85 @@ def book_info():
     return render_template('/User/book_info.html', name=session.get('user_name'), book=book, love=love)
 
 
+#查看/发表评论
+@main.route('/discuss', methods=['GET', 'POST'])
+@login_required
+def discuss():
+    book_id = request.args.get('book_id')
+    session['book_id'] = book_id
+    user_id = session['user_id']
+    flag = 0
+    if flag == 0:
+        return redirect(url_for('main.show_comment'))
+    else:
+        return render_template('/User/discuss_rating.html')
+
+#查看评论
+@main.route('/show_comment', methods=['GET', 'POST'])
+@login_required
+def show_comment():
+    book_id = session['book_id']
+    book = Book.query.filter_by(book_id=book_id).first()
+    discuss = Comment.query.filter_by(book_id=book_id).all()
+    comments = []
+    for dis in discuss:
+        comment_user_id = dis.user_id
+        comment_user = User.query.filter_by(user_id=comment_user_id).first()
+        item = {
+            "user_id": comment_user_id,
+            "user_name": comment_user.user_name,
+            "comment_time": dis.comment_time,
+            "comment": dis.comment
+        }
+        comments.append(item)
+    return render_template('/User/show_comment.html', comments=comments, book=book)
+
+
+#获取book对应的评论
+@main.route('/show_comment', methods=['GET', 'POST'])
+@login_required
+def get_comments():
+    data = []
+    book_id = session['book_id']
+    comments = Comment.query.filter_by(book_id=book_id).all()
+    for discuss in comments:
+        comment_user_id = discuss.user_id
+        comment_user = User.query.filter_by(user_id=comment_user_id).first()
+        item = {
+            "user_id": comment_user_id,
+            "user_name": comment_user.user_name,
+            "comment_time": discuss.comment_time,
+            "comment": discuss.comment
+        }
+        data.append(item)
+    return jsonify(data)
+
+
+#添加对book的评论
+@main.route('/add_comment', methods=['GET', 'POST'])
+@login_required
+def add_comment():
+    data = ''
+    if request.method == 'POST':
+        user_id = session['user_id']
+        book_id = session['book_id']
+        comment_content = request.values.get('comment')
+        discuss = Comment()
+        discuss.user_id = user_id
+        discuss.book_id = book_id
+        discuss.comment = comment_content
+        discuss.comment_time = 'suibian-test'
+        db.session.add(discuss)
+        db.session.commit()
+        data = 'ok'
+    return jsonify(data)
+
+
 # 添加到书架（收藏）
 @main.route('/add_favorite', methods=['GET', 'POST'])
 @login_required
 def add_favorite():
     data = ''
-
     if request.method == 'POST':
         book_id = session['book_id']
         user_id = session['user_id']
@@ -582,8 +655,7 @@ def add_favorite():
             condition1 = (Favorite.book_id == book_id)
             condition2 = (Favorite.user_id == user_id)
             love = Favorite.query.filter(and_(condition1, condition2)).first()
-            if love is None:
-                flag = 'fuck'
+
             db.session.delete(love)
             db.session.commit()
             data = 'cancel'

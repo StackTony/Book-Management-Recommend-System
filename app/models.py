@@ -114,6 +114,23 @@ class Favorite(db.Model):
         return '<Favorite %r>' % self.is_favorite
 
 """
+评论表 Comments
+*评论编号ID（主）
+*用户编号ID（外）
+*图书编号ID（外）
+*评论
+"""
+class Comment(db.Model):
+    __tablename__ = 'comments'
+    comment_id = db.Column(db.Integer,primary_key=True,autoincrement=True)
+    user_id = db.Column(db.ForeignKey('user.user_id'))
+    book_id = db.Column(db.ForeignKey('book.book_id'))
+    comment = db.Column(db.String(200))
+    comment_time = db.Column(db.String(20))
+    def __repr__(self):
+        return '<Rating %r>' % self.comment_id
+
+"""
 评分表 Rating（评分代表用户书架上有该书）
 *评分编号ID（主）
 *用户编号ID（外）
