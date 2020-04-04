@@ -83,6 +83,7 @@ class Admin(UserMixin, db.Model):
 *出版社
 *图书价格
 *库存数量
+*图书详情介绍
 """
 class Book(db.Model):
     __tablename__ = 'book'
@@ -94,6 +95,7 @@ class Book(db.Model):
     publish_name = db.Column(db.String(64))
     price = db.Column(db.Float(3))
     store_number = db.Column(db.Integer)
+    detail = db.Column(db.String(200))
 
     def __repr__(self):
         return '<Book %r>' % self.book_name

@@ -52,7 +52,7 @@
         //监听行单击事件（双击事件为：rowDouble）
         table.on('rowDouble(test)', function (obj) {
             order_id = JSON.stringify(obj.data.order_id);
-            layer.alert(order_id);
+            //layer.alert(order_id);
             window.location.href = "/order_info?order_id="+order_id;
         });
         //监听行工具事件-删除操作

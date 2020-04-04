@@ -1,9 +1,9 @@
 {% if name == '' %}
 {% extends "base.html" %}
-{% elif session['admin_name'] != '' %}
-{% extends "base_admin.html" %}
 {% elif session['user_name'] != '' %}
 {% extends "base_user.html" %}
+{% elif session['admin_name'] != '' %}
+{% extends "base_admin.html" %}
 {% endif %}
 
 {% block title %}图书商城信息列表{% endblock %}

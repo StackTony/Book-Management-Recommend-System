@@ -44,7 +44,10 @@
                                 </span>
                             </p>
                         </div>
-                        <p class="message-text" style="font-size: medium;margin-top: 10px">&nbsp &nbsp &nbsp &nbsp &nbsp &nbsp{{ comment['comment'] }}</p>
+                        <p class="message-text" style="font-size: medium;margin-top: 10px;margin-bottom: 10px">
+                            &nbsp &nbsp &nbsp &nbsp &nbsp &nbsp &nbsp &nbsp{{ comment['comment'] }}
+                        </p>
+                    <hr/>
                     </div>
                 {% endfor %}
             </fieldset>
@@ -74,7 +77,20 @@
 
             //监听提交
             form.on('submit(discuss)', function (data) {
-                layer.msg(JSON.stringify(data.field));
+                //layer.msg(JSON.stringify(data.field));
+                $.ajax({
+                    url: "{{ url_for('main.add_comment') }}",
+                    type: "POST",
+                    data: data.field,
+                    success: function (data) {
+                        if (data == 'ok') {
+                            layer.msg('发表成功！');
+                            window.location.href = "{{ url_for('main.show_comment') }}";
+                        } else {
+                            layer.msg('评论失败！')
+                        }
+                    }
+                })
                 return false;
             });
 

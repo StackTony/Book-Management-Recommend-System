@@ -144,7 +144,8 @@ def add_new_book():
             book.publish_date = request.form.get('publish_date')
             book.publish_name = request.form.get('publish_name')
             book.price = request.form.get('price')
-            book.store_number = 1
+            book.store_number = request.form.get('store_number')
+            book.detail = request.form.get('detail')
             db.session.add(book)
             db.session.commit()
             flash(u'新书入库成功！')
@@ -559,20 +560,7 @@ def book_info():
     return render_template('/User/book_info.html', name=session.get('user_name'), book=book, love=love)
 
 
-#查看/发表评论
-@main.route('/discuss', methods=['GET', 'POST'])
-@login_required
-def discuss():
-    book_id = request.args.get('book_id')
-    session['book_id'] = book_id
-    user_id = session['user_id']
-    flag = 0
-    if flag == 0:
-        return redirect(url_for('main.show_comment'))
-    else:
-        return render_template('/User/discuss_rating.html')
-
-#查看评论
+# 查看/发表评论
 @main.route('/show_comment', methods=['GET', 'POST'])
 @login_required
 def show_comment():
@@ -593,27 +581,7 @@ def show_comment():
     return render_template('/User/show_comment.html', comments=comments, book=book)
 
 
-#获取book对应的评论
-@main.route('/show_comment', methods=['GET', 'POST'])
-@login_required
-def get_comments():
-    data = []
-    book_id = session['book_id']
-    comments = Comment.query.filter_by(book_id=book_id).all()
-    for discuss in comments:
-        comment_user_id = discuss.user_id
-        comment_user = User.query.filter_by(user_id=comment_user_id).first()
-        item = {
-            "user_id": comment_user_id,
-            "user_name": comment_user.user_name,
-            "comment_time": discuss.comment_time,
-            "comment": discuss.comment
-        }
-        data.append(item)
-    return jsonify(data)
-
-
-#添加对book的评论
+# 添加对book的评论
 @main.route('/add_comment', methods=['GET', 'POST'])
 @login_required
 def add_comment():
@@ -698,6 +666,7 @@ def create_order():
         'publish_name': book.publish_name,
         'publish_date': book.publish_date,
         'store_number': book.store_number,
+        'detail': book.detail,
         # 订单信息
         'order_id': order_id,
         'buy_number': order.buy_number,
@@ -744,6 +713,7 @@ def get_order_info():
         'publish_name': book.publish_name,
         'publish_date': book.publish_date,
         'store_number': book.store_number,
+        'detail': book.detail,
         # 订单信息
         'order_id': order_id,
         'buy_number': order.buy_number,
@@ -836,7 +806,6 @@ def edit_order():
                 data = 'case1'
                 db.session.delete(order)
                 db.session.commit()
-
             elif field == 'buy_number':
                 price = book.price
                 left_store = book.store_number
@@ -882,18 +851,10 @@ def get_book_info():
         'average_rating': book.average_rating,
         'publish_name': book.publish_name,
         'publish_date': book.publish_date,
-        'store_number': book.store_number
+        'store_number': book.store_number,
+        'detail': book.detail
     }
     return jsonify(item)
-
-
-# 讨论+评分页
-@main.route('/discuss_rating', methods=['GET', 'POST'])
-@login_required
-def discuss_rating():
-    book_id = request.args.get('book_id')  # 获取/add_order?book_id=XXX的值
-    book = Book.query.filter_by(book_id=book_id).first()
-    return render_template('/User/discuss_rating.html', name=session['user_name'], book=book)
 
 
 # 我的账户-查看用户个人信息（可编辑修改基本信息，不含密码的修改）  √
@@ -902,6 +863,47 @@ def discuss_rating():
 def user_info():
     form = UserInfoForm()
     return render_template('/User/user_info.html', name=session.get('user_name'), form=form)
+
+
+# 我的账户-查看用户个人信息（可编辑修改基本信息，不含密码的修改）  √
+@main.route('/my_books', methods=['GET', 'POST'])
+@login_required
+def my_books():
+    user_id = session['user_id']
+    favorite_books = Favorite.query.filter_by(user_id=user_id).all()
+    favor_books = []
+    for favor in favorite_books:
+        book = Book.query.filter_by(book_id=favor.book_id).first()
+        item = {
+            "book_id": book.book_id,
+            "book_name": book.book_name,
+            "author": book.author,
+            'price': book.price,
+            'average_rating': book.average_rating,
+            'publish_name': book.publish_name,
+            'publish_date': book.publish_date,
+            'store_number': book.store_number,
+            'detail': book.detail
+        }
+        favor_books.append(item)
+
+    order_books = Orders.query.filter_by(user_id=user_id).all()
+    buy_books = []
+    for buy in order_books:
+        book = Book.query.filter_by(book_id=buy.book_id).first()
+        item = {
+            "book_id": book.book_id,
+            "book_name": book.book_name,
+            "author": book.author,
+            'price': book.price,
+            'average_rating': book.average_rating,
+            'publish_name': book.publish_name,
+            'publish_date': book.publish_date,
+            'store_number': book.store_number,
+            'detail': book.detail
+        }
+        buy_books.append(item)
+    return render_template('/User/my_books.html', favor_books=favor_books, buy_books=buy_books)
 
 
 # 我的账户-根据用户id返回个人信息数据给前台（可编辑修改基本信息，不含密码的修改）

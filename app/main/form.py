@@ -71,6 +71,8 @@ class AddNewBookForm(FlaskForm):
     publish_date = StringField(validators=[DataRequired(), Length(1, 64)])
     publish_name = StringField(validators=[DataRequired(), Length(1, 64)])
     price = FloatField(validators=[DataRequired()])
+    store_number = IntegerField(validators=[DataRequired()])
+    detail = StringField(validators=[DataRequired(),Length(0,200)])
     submit = SubmitField(u'添加')
 
 #管理员-添加书籍-库存更新表单

@@ -1,0 +1,84 @@
+{% extends "base_user.html" %}
+{% block card %}
+
+{% endblock %}
+
+{% block body %}
+    <fieldset class="layui-elem-field">
+        <ul class="layui-nav layui-bg-blue" lay-filter="">
+            <li id="love" class="layui-nav-item">收藏书籍</li>
+        </ul>
+        <div id="love_book" class="layui-fluid layadmin-cmdlist-fluid" style="margin-top: 10px;">
+            <div class="layui-row layui-col-space30">
+                {% for book in favor_books %}
+                    <div class="layui-col-md3 layui-col-sm5">
+                        <div class="cmdlist-container layui-bg-gray" style="text-align: center; height: 320px">
+                            <a href="javascript:;">
+                                <a href="/book_info?book_id={{ book['book_id'] }}">
+                                    <img src="../../static/icon.jpg" width="240px" style="padding-top: 15px;">
+                                </a>
+                            </a>
+                            <a href="/book_info?book_id={{ book['book_id'] }}">
+                                <div class="cmdlist-text" style="padding-top: 10px">
+                                    <b class="bookname" style="font-size: medium;">《{{ book['book_name'] }}》</b>
+                                    <div style="margin-top: 10px">
+                                        <p>作者：{{ book['author'] }}</p>
+                                    </div>
+                                    <div class="rating" style="margin-top: 10px">
+                                        <p>评分：{{ book['average_rating'] }}</p>
+                                    </div>
+                                    <div class="price" style="; margin-top: 10px">
+                                        <p>单价 ￥{{ book['price'] }}元</p>
+                                    </div>
+                                </div>
+                            </a>
+                        </div>
+                    </div>
+                {% endfor %}
+            </div>
+        </div>
+
+    </fieldset>
+
+    <fieldset class="layui-elem-field">
+        <div>
+            <ul class="layui-nav layui-bg-blue" lay-filter="">
+                <li id="buy" class="layui-nav-item ">已购书籍</li>
+            </ul>
+            <div id="buy_book" class="layui-fluid layadmin-cmdlist-fluid" style="margin-top: 10px;">
+                <div class="layui-row layui-col-space30">
+                    {% for book in buy_books %}
+                        <div class="layui-col-md3 layui-col-sm5">
+                            <div class="cmdlist-container layui-bg-gray" style="text-align: center; height: 320px">
+                                <a href="javascript:;">
+                                    <a href="/book_info?book_id={{ book['book_id'] }}">
+                                        <img src="../../static/icon.jpg" width="240px" style="padding-top: 15px;">
+                                    </a>
+                                </a>
+                                <a href="/book_info?book_id={{ book['book_id'] }}">
+                                    <div class="cmdlist-text" style="padding-top: 10px">
+                                        <b class="bookname" style="font-size: medium;">《{{ book['book_name'] }}》</b>
+                                        <div style="margin-top: 10px">
+                                            <p>作者：{{ book['author'] }}</p>
+                                        </div>
+                                        <div class="rating" style="margin-top: 10px">
+                                            <p>评分：{{ book['average_rating'] }}</p>
+                                        </div>
+                                        <div class="price" style="; margin-top: 10px">
+                                            <p>单价 ￥{{ book['price'] }}元</p>
+                                        </div>
+                                    </div>
+                                </a>
+                            </div>
+                        </div>
+                    {% endfor %}
+                </div>
+            </div>
+        </div>
+    </fieldset>
+
+{% endblock %}
+
+{% block script %}
+
+{% endblock %}
