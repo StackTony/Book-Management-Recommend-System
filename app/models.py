@@ -24,6 +24,7 @@ class User(UserMixin, db.Model):
     age = db.Column(db.Integer)
     local = db.Column(db.String(30))
     password = db.Column(db.String(24))
+    photo = db.Column(db.String(200))
 
     def __init__(self,user_name, sex, age, local, password):
         self.user_name = user_name
@@ -31,6 +32,7 @@ class User(UserMixin, db.Model):
         self.age = age
         self.local = local
         self.password = password
+
     def get_id(self):
         return self.user_id
     def get_name(self):
@@ -83,6 +85,7 @@ class Admin(UserMixin, db.Model):
 *出版社
 *图书价格
 *库存数量
+*图书图片位置
 *图书详情介绍
 """
 class Book(db.Model):
@@ -95,6 +98,7 @@ class Book(db.Model):
     publish_name = db.Column(db.String(64))
     price = db.Column(db.Float(3))
     store_number = db.Column(db.Integer)
+    book_photo = db.Column(db.String(50))
     detail = db.Column(db.String(200))
 
     def __repr__(self):

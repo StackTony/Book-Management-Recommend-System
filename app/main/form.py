@@ -1,6 +1,7 @@
 # -*- coding: utf-8 -*-
 #定义表单
 from flask_wtf import FlaskForm, validators
+from flask_wtf.file import FileField, FileRequired
 from wtforms import StringField, SubmitField, SelectField, PasswordField, IntegerField, FloatField
 from wtforms.validators import DataRequired, EqualTo, Length
 
@@ -81,3 +82,7 @@ class AddBookStoreForm(FlaskForm):
     number = IntegerField(validators=[DataRequired()]) #可正可负
     location = StringField(validators=[DataRequired(), Length(1, 64)])
     submit = SubmitField(u'添加')
+
+
+class ChangePhotoForm(FlaskForm):
+    photo = FileField(validators=[FileRequired()])

@@ -43,7 +43,9 @@
 <div class="layui-layout layui-layout-admin">
     <!--index部分-->
     <div class="layui-header layui-bg-cyan">
-        <div class="layui-logo"><span style="color:#F0F0F0;font-size: large">图书管理推荐系统</span></div>
+        <div class="layui-logo">
+            <a href="{{ url_for('main.base_admin') }}"><span style="color:#F0F0F0;font-size: large">图书管理推荐系统</span></a>
+        </div>
         <ul class="layui-nav layui-layout-right">
             <li class="layui-nav-item">欢迎管理员，{{session["admin_name"]}}~</li>
             <li class="layui-nav-item"><a class="aa" href="{{ url_for('main.logout') }}">注销</a></li>

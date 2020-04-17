@@ -176,6 +176,13 @@
                 }
                 return false;
             })
+
+            //监听行单击事件（双击事件为：rowDouble）
+            table.on('rowDouble(test)', function (obj) {
+                book_id = obj.data.book_id;
+                //layer.alert(book_id);
+                window.location.href = "/change_book_info?book_id=" + book_id;
+            });
             //监听行工具事件-删除操作
             table.on('tool(test)', function (obj) {
                 var data = obj.data;

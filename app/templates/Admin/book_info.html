@@ -1,0 +1,133 @@
+{% extends "base_admin.html" %}
+{% block card %}
+    <div class="layui-card-header"><h2>修改图书信息</h2></div>
+{% endblock %}
+
+{% block body %}
+    <form class="layui-form" lay-filter="show">
+        <div class="layui-form-item">
+            <label class="layui-form-label">图书编号：</label>
+            <div class="layui-input-block">
+                <input name="book_id" disabled class="layui-input" style="width:300px" type="text" autocomplete="off">
+            </div>
+        </div>
+        <div class="layui-form-item">
+            <label class="layui-form-label">书名：</label>
+            <div class="layui-input-block">
+                <input name="book_name" class="layui-input" style="width:300px" type="text" autocomplete="off">
+            </div>
+        </div>
+        <div class="layui-form-item">
+            <label class="layui-form-label">评分：</label>
+            <div class="layui-input-block">
+                <input name="average_rating" disabled class="layui-input" style="width:300px" type="text" autocomplete="off">
+            </div>
+        </div>
+        <div class="layui-form-item">
+            <label class="layui-form-label">作者：</label>
+            <div class="layui-input-block">
+                <input name="author" class="layui-input" style="width:300px" type="text" autocomplete="off">
+            </div>
+        </div>
+        <div class="layui-form-item">
+            <label class="layui-form-label">单价：</label>
+            <div class="layui-input-block">
+                <input name="price" class="layui-input" style="width:300px" type="text" autocomplete="off">
+            </div>
+        </div>
+        <div class="layui-form-item">
+            <label class="layui-form-label">库存量：</label>
+            <div class="layui-input-block">
+                <input name="store_number" class="layui-input" style="width:300px" type="text" autocomplete="off">
+            </div>
+        </div>
+        <div class="layui-form-item">
+            <label class="layui-form-label">出版社：</label>
+            <div class="layui-input-block">
+                <input name="publish_name" class="layui-input" style="width:300px" type="text" autocomplete="off">
+            </div>
+        </div>
+        <div class="layui-form-item">
+            <label class="layui-form-label">出版日期：</label>
+            <div class="layui-input-block">
+                <input name="publish_date" class="layui-input" style="width:300px" type="text" autocomplete="off">
+            </div>
+        </div>
+
+        <div class="layui-form-item">
+            <label class="layui-form-label">图书介绍：</label>
+            <div class="layui-input-block">
+                <input name="detail" class="layui-input" style="width:300px" type="text" autocomplete="off">
+            </div>
+        </div>
+        <div class="layui-form-item" style="height: 50px; width: 200px">
+            <div class="layui-input-block">
+                <button class="layui-btn" lay-submit lay-filter="change" style="width: 100px">确认修改</button>
+            </div>
+        </div>
+
+    </form>
+{% endblock %}
+
+{% block script %}
+    <script>
+        layui.use(['form', 'jquery'], function () {
+            var form = layui.form;
+            var $ = layui.$;
+            //显示信息刷新
+            refresh();
+            form.on('submit(change)', function (data) {
+                //layer.msg(JSON.stringify(data.field));
+                $.ajax({
+                    url: "{{ url_for('main.change_book_info') }}",
+                    type: "POST",
+                    data: {
+                        "book_name": data.field['book_name'],
+                        "author": data.field['author'],
+                        "price": data.field['price'],
+                        "store_number": data.field['store_number'],
+                        "publish_name": data.field['publish_name'],
+                        "publish_date": data.field['publish_date'],
+                        "detail": data.field['detail']
+                    },
+                    success: function (data) {
+                        if(data == 'ok'){
+                            refresh();
+                            layer.msg('修改成功');
+                        }
+                        else{
+                            layer.msg('修改失败');
+                        }
+                    }
+                })
+                return false;
+            })
+
+            function refresh(){
+                $.ajax({
+                url: "{{ url_for('main.get_book_info') }}",
+                type: "get",
+                processData: false,
+                contentType: false,
+                success: function (data) {
+                    //layer.msg(JSON.stringify(data));
+                    //显示基本信息
+                    form.val('show', {
+                        "book_id": data['book_id'],
+                        "book_name": data['book_name'],
+                        "author": data['author'],
+                        "price": data['price'],
+                        "average_rating": data['average_rating'],
+                        "publish_name": data['publish_name'],
+                        "publish_date": data['publish_date'],
+                        "detail": data['detail'],
+                        "store_number": data['store_number']
+                    });
+                }
+
+            });
+            }
+
+        });
+    </script>
+{% endblock %}

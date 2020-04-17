@@ -4,38 +4,38 @@
 {% endblock %}
 
 {% block body %}
-<div class="row">
-    <div class="layui-fluid layadmin-cmdlist-fluid ">
-        <div class="layui-row layui-col-space30">
-            {% for book in books %}
-            <div class="layui-col-md3 layui-col-sm5">
-                <div class="cmdlist-container layui-bg-gray" style="text-align: center; height: 320px">
-                    <a href="javascript:;">
-                        <a href="/book_info?book_id={{book['book_id']}}">
-                            <img src="../../static/icon.jpg" width="240px" style="padding-top: 15px;">
-                        </a>
-                    </a>
-                    <a href="/book_info?book_id={{book['book_id']}}">
-                        <div class="cmdlist-text" style="padding-top: 10px">
-                            <b class="bookname" style="font-size: medium;">《{{book['book_name']}}》</b>
-                            <div style="margin-top: 10px">
-                                <p>作者：{{ book['author'] }}</p>
-                            </div>
-                            <div class="rating" style="margin-top: 10px">
-                                <p>评分：{{ book['average_rating'] }}</p>
-                            </div>
-                            <div class="price" style="; margin-top: 10px">
-                                <p>单价 ￥{{ book['price'] }}元</p>
-                            </div>
+    <div class="row">
+        <div class="layui-fluid layadmin-cmdlist-fluid ">
+            <div class="layui-row layui-col-space30">
+                {% for book in books %}
+                    <div class="layui-col-md3 layui-col-sm5">
+                        <div class="cmdlist-container layui-bg-gray" style="text-align: center; height: 320px">
+                            <a href="javascript:;">
+                                <a href="/book_info?book_id={{ book['book_id'] }}">
+                                    <img src="../../static/books/icon.jpg" width="240px" style="padding-top: 15px;">
+                                </a>
+                            </a>
+                            <a href="/book_info?book_id={{ book['book_id'] }}">
+                                <div class="cmdlist-text" style="padding-top: 10px">
+                                    <b class="bookname" style="font-size: medium;">《{{ book['book_name'] }}》</b>
+                                    <div style="margin-top: 10px">
+                                        <p>作者：{{ book['author'] }}</p>
+                                    </div>
+                                    <div class="rating" style="margin-top: 10px">
+                                        <p>评分：{{ book['average_rating'] }}</p>
+                                    </div>
+                                    <div class="price" style="; margin-top: 10px">
+                                        <p>单价 ￥{{ book['price'] }}元</p>
+                                    </div>
 
+                                </div>
+                            </a>
                         </div>
-                    </a>
-                </div>
+                    </div>
+                {% endfor %}
             </div>
-            {% endfor %}
         </div>
     </div>
-</div>
 {% endblock %}
 
 {% block script %}

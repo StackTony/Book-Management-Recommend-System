@@ -1,12 +1,15 @@
 # -*- coding: utf-8 -*-
 
 import time, datetime
+import os
 import numpy as np
 from flask import render_template, session, redirect, url_for, flash, request, jsonify
 from sqlalchemy import and_
 from flask_login import login_user, logout_user, login_required, current_user, login_manager
+from werkzeug.utils import secure_filename
+
 from .form import LoginForm, RegisterForm, SearchUserForm, SearchBookForm, AddNewBookForm, \
-    AddBookStoreForm, ChangePasswordForm, UserInfoForm
+    AddBookStoreForm, ChangePasswordForm, UserInfoForm, ChangePhotoForm
 from .. import db
 from . import main
 from ..models import User, Admin, Book, Rating, Orders, Inventory, Favorite, Comment
@@ -26,12 +29,13 @@ def index():
 # 热门图书（列出所有图书，按照评分高低排序）  √
 @main.route('/hot_book', methods=['GET', 'POST'])
 def hot_book():
+    books = Book.query.order_by(Book.average_rating.desc()).limit(5).all()
     if session['user_name'] == '' and session['admin_name'] == '':
-        return render_template('hot_book.html', name='')
+        return render_template('hot_book.html', name='', books=books)
     elif session['user_name'] != '':
-        return render_template('hot_book.html', name=session['user_name'])
+        return render_template('hot_book.html', name=session['user_name'], books=books)
     else:
-        return render_template('hot_book.html', name=session['admin_name'])
+        return render_template('hot_book.html', name=session['admin_name'], books=books)
 
 
 # 不需要根据特定类别名查询，将所有书籍信息返回前端
@@ -217,6 +221,38 @@ def modify_book():
     # 利用ajax传值获取信息进行后台操作，放到delete_book和edit_book中
     return render_template('/Admin/modify_book.html', name=session.get('admin_name'), form=form)
 
+#管理员-图书管理-修改图书详情页
+@main.route('/change_book_info', methods=['GET', 'POST'])
+@login_required
+def change_book_info():
+    if request.method == 'POST':
+        data = ''
+        book_id = session['book_id']
+        book = Book.query.filter_by(book_id=book_id).first()
+
+        book_name = request.values.get("book_name")
+        author = request.values.get("author")
+        price = request.values.get("price")
+        store_number = request.values.get("store_number")
+        publish_name = request.values.get("publish_name")
+        publish_date = request.values.get("publish_date")
+        detail = request.values.get("detail")
+        if int(store_number) >= 0:
+            book.book_name = book_name
+            book.author = author
+            book.price = price
+            book.store_number = store_number
+            book.publish_name = publish_name
+            book.publish_date = publish_date
+            book.detail = detail
+            db.session.commit()
+            data = 'ok'
+        return jsonify(data);
+    else:
+        book_id = request.args.get('book_id')
+        book = Book.query.filter_by(book_id=book_id).first()
+        session['book_id'] = book_id
+        return render_template('/Admin/book_info.html',name=session.get('admin_name'),book=book)
 
 # 管理员-图书管理-修改图书基本信息
 # 删除图书
@@ -862,7 +898,23 @@ def get_book_info():
 @login_required
 def user_info():
     form = UserInfoForm()
-    return render_template('/User/user_info.html', name=session.get('user_name'), form=form)
+    user_id = session['user_id']
+    user = User.query.filter_by(user_id=user_id).first()
+    if request.method == 'POST':
+        f = request.files["files"]
+        base_path = os.getcwd()
+        app_path = os.path.join(base_path, 'app/')
+        static_path = os.path.join(app_path, 'static/')
+        upload_path = os.path.join(static_path,'users/')
+        file_path = upload_path + secure_filename(f.filename)
+        #保存文件
+        f.save(file_path)
+        #删除原来图片
+        os.remove(upload_path + user.photo)
+        user.photo = f.filename
+        db.session.add(user)
+        db.session.commit()
+    return render_template('/User/user_info.html', name=session.get('user_name'), form=form, user=user)
 
 
 # 我的账户-查看用户个人信息（可编辑修改基本信息，不含密码的修改）  √
@@ -1064,3 +1116,17 @@ def logout():
     logout_user()
     session.clear()
     return redirect(url_for('main.login'))
+
+
+# 测试页面
+@main.route("/test", methods=['GET', 'POST'])
+def test():
+    if request.method == 'POST':
+        f = request.files["files"]
+        base_path = getcwd()
+        f_path = path.join(base_path, 'app/')
+        upload_path = path.join(f_path, 'static/')
+        file_name = upload_path + secure_filename(f.filename)
+        f.save(file_name)
+
+    return render_template('/User/test.html')
