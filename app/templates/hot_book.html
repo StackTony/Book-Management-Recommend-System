@@ -6,12 +6,31 @@
     {% extends "base_admin.html" %}
 {% endif %}
 
-{% block title %}图书商城信息列表{% endblock %}
+{% block title %}热门图书信息{% endblock %}
 
 {% block card %}
-    <div class="layui-card-header"><h2>图书信息列表</h2></div>{% endblock %}
-{% block body %}
+ <div class="layui-card-header"><h2>热门图书</h2></div>
+{% endblock %}
 
+{% block body %}
+    <div class="layui-carousel" id="showHotbook">
+        <div carousel-item="" >
+            {% for book in books %}
+                <div>
+                    <a href="javascript:;">
+                        <a href="/book_info?book_id={{ book['book_id'] }}">
+                            <img src="../../static/books/{{ book['book_photo'] }}" width="800px">
+                        </a>
+                    </a>
+                </div>
+            {% endfor %}
+        </div>
+    </div>
+
+
+    <fieldset class="layui-elem-field layui-field-title" style="margin-top: 50px;">
+        <legend>图书信息列表</legend>
+    </fieldset>
     <div id="remove">
         <table lay-even id="result" lay-filter="re">
             <thead>
@@ -35,25 +54,6 @@
     </div>
 
     <table id="test" lay-filter="test"></table>
-
-    <fieldset class="layui-elem-field layui-field-title" style="margin-top: 50px;">
-        <legend>填充轮播元素</legend>
-    </fieldset>
-
-    <div class="layui-carousel" id="showHotbook">
-        <div carousel-item="">
-            {% for book in books %}
-                <div>
-                    <a href="javascript:;">
-                        <a href="/book_info?book_id={{ book['book_id'] }}">
-                            <img src="../../static/icon.jpg" width="800px">
-                        </a>
-                    </a>
-                </div>
-            {% endfor %}
-        </div>
-    </div>
-
 
 {% endblock %}
 

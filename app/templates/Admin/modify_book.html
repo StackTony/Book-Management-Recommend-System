@@ -36,7 +36,7 @@
             <th lay-data="{field:'author', width:120, edit:'text'}">作者</th>
             <th lay-data="{field:'average_rating', sort:true, width:100}">评分</th>
             <th lay-data="{field:'price', sort:true, width:100, edit:'text'}">价格</th>
-            <th lay-data="{field:'publish_data', sort:true, width:120, edit:'text'}">出版日期</th>
+            <th lay-data="{field:'publish_data', sort:true, width:120}">出版日期</th>
             <th lay-data="{field:'publish_name', width:140, edit:'text'}">出版社</th>
             <th lay-data="{field:'store_number', sort:true, width:120}">库存图书量</th>
         </tr>
@@ -88,7 +88,7 @@
                             , {field: 'author', title: '作者', edit: 'text', width: 140}
                             , {field: 'average_rating', title: '评分', sort: true, width: 120}
                             , {field: 'price', title: '价格', sort: true, edit: 'text', width: 120}
-                            , {field: 'publish_date', title: '出版日期', sort: true, edit: 'text', width: 140}
+                            , {field: 'publish_date', title: '出版日期', sort: true,width: 140}
                             , {field: 'publish_name', title: '出版社', edit: 'text', width: 140}
                             , {field: 'store_number', title: '库存图书量', sort: true, width: 140}
                             , {fixed: 'right', title: '操作', toolbar: '#barDemo'}
@@ -143,7 +143,7 @@
                                         , {field: 'author', title: '作者', edit: 'text', width: 140}
                                         , {field: 'average_rating', title: '评分', sort: true, width: 120}
                                         , {field: 'price', title: '价格', sort: true, edit: 'text', width: 120}
-                                        , {field: 'publish_date', title: '出版日期', sort: true, edit: 'text', width: 140}
+                                        , {field: 'publish_date', title: '出版日期', sort: true, width: 140}
                                         , {field: 'publish_name', title: '出版社', edit: 'text', width: 140}
                                         , {field: 'store_number', title: '库存图书量', sort: true, width: 140}
                                         , {fixed: 'right', title: '操作', toolbar: '#barDemo'}
@@ -233,7 +233,6 @@
                                                         field: 'publish_date',
                                                         title: '出版日期',
                                                         sort: true,
-                                                        edit: 'text',
                                                         width: 140
                                                     }
                                                     , {field: 'publish_name', title: '出版社', edit: 'text', width: 140}

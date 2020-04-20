@@ -169,7 +169,7 @@ class Orders(db.Model):
     user_id = db.Column(db.Integer)
     book_id = db.Column(db.String(13))
     buy_number = db.Column(db.Integer)
-    buy_date = db.Column(db.String(20))
+    buy_date = db.Column(db.String(50))
     total_price = db.Column(db.Float(5))
     local = db.Column(db.String(50))
 

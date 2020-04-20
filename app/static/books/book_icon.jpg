@@ -14,7 +14,7 @@ from .. import db
 from . import main
 from ..models import User, Admin, Book, Rating, Orders, Inventory, Favorite, Comment
 
-BOOK_PHOTO = 'book_icon.jpg'
+BOOK_PHOTO = 'icon.jpg'
 USER_PHOTO = 'user_icon.jpg'
 
 # 首页   √
