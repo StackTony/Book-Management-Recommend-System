@@ -99,7 +99,7 @@ class Book(db.Model):
     price = db.Column(db.Float(3))
     store_number = db.Column(db.Integer)
     book_photo = db.Column(db.String(50))
-    detail = db.Column(db.String(200))
+    detail = db.Column(db.String(2000))
 
     def __repr__(self):
         return '<Book %r>' % self.book_name
@@ -132,7 +132,7 @@ class Comment(db.Model):
     user_id = db.Column(db.ForeignKey('user.user_id'))
     book_id = db.Column(db.ForeignKey('book.book_id'))
     comment = db.Column(db.String(200))
-    comment_time = db.Column(db.String(20))
+    comment_time = db.Column(db.String(50))
     def __repr__(self):
         return '<Rating %r>' % self.comment_id
 
@@ -190,7 +190,7 @@ class Inventory(db.Model):
     bar_id = db.Column(db.Integer, primary_key=True)
     book_id = db.Column(db.String(13))
     storage_number = db.Column(db.Integer) #可正可负
-    storage_date = db.Column(db.String(13))
+    storage_date = db.Column(db.String(50))
     location = db.Column(db.String(32))
     admin_id = db.Column(db.ForeignKey('admin.admin_id'))  # 入库操作员
 

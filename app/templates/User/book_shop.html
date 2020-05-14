@@ -9,22 +9,22 @@
             <div class="layui-row layui-col-space30">
                 {% for book in books %}
                     <div class="layui-col-md3 layui-col-sm5">
-                        <div class="cmdlist-container layui-bg-gray" style="text-align: center; height: 320px">
+                        <div class="cmdlist-container layui-bg-gray" style="text-align: center; height: 430px">
                             <a href="javascript:;">
                                 <a href="/book_info?book_id={{ book['book_id'] }}">
-                                    <img src="../../static/books/{{ book['book_photo'] }}" width="240px" height="160px" style="padding-top: 15px;">
+                                    <img src="../../static/books/{{ book['book_photo'] }}" width="240px" height="280px" style="padding-top: 15px;">
                                 </a>
                             </a>
                             <a href="/book_info?book_id={{ book['book_id'] }}">
                                 <div class="cmdlist-text" style="padding-top: 10px">
                                     <b class="bookname" style="font-size: medium;">《{{ book['book_name'] }}》</b>
-                                    <div style="margin-top: 10px">
+                                    <div style="margin-top: 5px">
                                         <p>作者：{{ book['author'] }}</p>
                                     </div>
-                                    <div class="rating" style="margin-top: 10px">
+                                    <div class="rating" style="margin-top: 5px">
                                         <p>评分：{{ book['average_rating'] }}</p>
                                     </div>
-                                    <div class="price" style="; margin-top: 10px">
+                                    <div class="price" style="; margin-top: 5px">
                                         <p>单价 ￥{{ book['price'] }}元</p>
                                     </div>
 

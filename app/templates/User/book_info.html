@@ -7,12 +7,11 @@
     <div class="row">
         <div class="layui-col-md6 layui-col-sm5">
             <a href="javascript:;">
-                <img src="../../static/books/{{ book['book_photo'] }}" width="450px" height="480px"
+                <img src="../../static/books/{{ book['book_photo'] }}" width="450px" height="500px"
                      style="padding-top: 15px;">
             </a>
         </div>
         <div class="layui-col-md6 layui-col-sm5">
-
             <form class="layui-form" lay-filter="show">
                 <div class="layui-form-item">
                     <label class="layui-form-label">图书编号：</label>
@@ -21,14 +20,6 @@
                                autocomplete="off">
                     </div>
                 </div>
-                <!--
-                <div class="layui-form-item">
-                    <label class="layui-form-label">书名：</label>
-                    <div class="layui-input-block">
-                        <input name="book_name" disabled class="layui-input" style="width:300px" type="text" autocomplete="off">
-                    </div>
-                </div>
-                -->
                 <div class="layui-form-item">
                     <label class="layui-form-label">评分：</label>
                     <div class="layui-input-block">
@@ -39,26 +30,22 @@
                 <div class="layui-form-item">
                     <label class="layui-form-label">作者：</label>
                     <div class="layui-input-block">
-                        <input name="author" disabled class="layui-input" style="width:300px" type="text"
-                               autocomplete="off">
+                        <input name="author" disabled class="layui-input" style="width:300px" type="text" autocomplete="off">
                     </div>
                 </div>
                 <div class="layui-form-item">
                     <label class="layui-form-label">单价：</label>
                     <div class="layui-input-block">
-                        <input name="price" disabled class="layui-input" style="width:300px" type="text"
-                               autocomplete="off">
+                        <input name="price" disabled class="layui-input" style="width:300px" type="text" autocomplete="off">
                     </div>
                 </div>
-                <!--
                 <div class="layui-form-item">
                     <label class="layui-form-label">库存量：</label>
                     <div class="layui-input-block">
-                        <input name="store_number" disabled disabled class="layui-input" style="width:300px" type="text"
+                        <input name="store_number" disabled class="layui-input" style="width:300px" type="text"
                                autocomplete="off">
                     </div>
                 </div>
-                -->
                 <div class="layui-form-item">
                     <label class="layui-form-label">出版社：</label>
                     <div class="layui-input-block">
@@ -78,13 +65,13 @@
                 <div class="layui-form-item">
                     <label class="layui-form-label">图书介绍：</label>
                     <div class="layui-input-block">
-                        <textarea name="detail" class="layui-textarea" placeholder="请输入内容" style="width:300px; "
-                                  type="text" disabled autocomplete="off"></textarea>
+                        <textarea name="detail" disabled class="layui-textarea" placeholder="请输入内容" style="width:300px; "
+                                  type="text" autocomplete="off"></textarea>
                     </div>
                 </div>
-            </form>
 
-            <div style="padding-bottom: 10px;padding-top: 10px;padding-left: 60px">
+            </form>
+            <div style="padding-bottom: 10px;padding-top: 10px;padding-left: 50px">
                 <a href="/show_comment?book_id={{ book['book_id'] }}">
                     <button class="layui-btn layui-btn-sm layui-btn-primary" type="button">
                         <i class="layui-icon">&#xe611;</i>
@@ -105,11 +92,51 @@
 {% endblock %}
 
 {% block script %}
+    <script>
+        layui.use(['laydate', 'form', 'jquery'], function () {
+            var form = layui.form;
+            var $ = layui.$;
+            var laydate = layui.laydate;
+
+            laydate.render({
+                elem: '#date'
+            });
+
+            //显示信息刷新
+            refresh();
+
+            function refresh() {
+                $.ajax({
+                    url: "{{ url_for('main.get_book_info') }}",
+                    type: "get",
+                    processData: false,
+                    contentType: false,
+                    success: function (data) {
+                        //layer.msg(JSON.stringify(data));
+                        //显示基本信息
+                        form.val('show', {
+                            "book_id": data['book_id'],
+                            "book_name": data['book_name'],
+                            "author": data['author'],
+                            "price": data['price'],
+                            "average_rating": data['average_rating'],
+                            "publish_name": data['publish_name'],
+                            "publish_date": data['publish_date'],
+                            "detail": data['detail'],
+                            "store_number": data['store_number']
+                        });
+                    }
+
+                });
+            }
+        });
+    </script>
     <script type="text/javascript">
         $(document).ready(function () {
             var love = '{{ love }}'
             var kongxin = document.getElementById("kongxin");
             var shixin = document.getElementById("shixin");
+
             if (love == '1') {
                 kongxin.style.display = 'none';
                 shixin.style.display = 'block';
@@ -158,38 +185,6 @@
                 });
             }
         });
-    </script>
-    <script>
-    layui.use(['form', 'jquery'], function () {
-        var form = layui.form;
-        var $ = layui.$;
-        refresh();
-        function refresh() {
-                $.ajax({
-                    url: "{{ url_for('main.get_book_info') }}",
-                    type: "get",
-                    processData: false,
-                    contentType: false,
-                    success: function (data) {
-                        //layer.msg(JSON.stringify(data));
-                        //显示基本信息
-                        form.val('show', {
-                            "book_id": data['book_id'],
-                            "book_name": data['book_name'],
-                            "author": data['author'],
-                            "price": data['price'],
-                            "average_rating": data['average_rating'],
-                            "publish_name": data['publish_name'],
-                            "publish_date": data['publish_date'],
-                            "detail": data['detail'],
-                            "store_number": data['store_number']
-                        });
-                    }
-
-                });
-            }
-
-    });
     </script>
 {% endblock %}
 

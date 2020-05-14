@@ -9,19 +9,30 @@
 {% block title %}热门图书信息{% endblock %}
 
 {% block card %}
- <div class="layui-card-header"><h2>热门图书</h2></div>
+    <div class="layui-card-header"><h2>热门图书</h2></div>
 {% endblock %}
 
 {% block body %}
     <div class="layui-carousel" id="showHotbook">
-        <div carousel-item="" >
+        <div carousel-item="">
             {% for book in books %}
-                <div>
-                    <a href="javascript:;">
-                        <a href="/book_info?book_id={{ book['book_id'] }}">
-                            <img src="../../static/books/{{ book['book_photo'] }}" width="800px">
+                <div class="row">
+                    <div class="layui-col-md6 layui-col-sm5">
+                        <a href="javascript:;">
+                            <a href="/book_info?book_id={{ book['book_id'] }}">
+                                <img src="../../static/books/{{ book['book_photo'] }}" width="400px" height="480px">
+                            </a>
                         </a>
-                    </a>
+                    </div>
+                    <div class="layui-col-md6 layui-col-sm5" style="padding-left: 50px; padding-right: 20px">
+                        <p style="margin-top: 10px">图书编号：{{ book['book_id'] }}</p>
+                        <p style="margin-top: 10px">图书名称：《{{ book['book_name'] }}》</p>
+                        <p style="margin-top: 10px">作者：{{ book['author'] }}</p>
+                        <p style="margin-top: 10px">评分：{{ book['average_rating'] }}</p>
+                        <p style="margin-top: 10px">出版社：{{ book['publish_name'] }}</p>
+                        <p style="margin-top: 10px">出版日期：{{ book['publish_date'] }}</p>
+                        <p style="margin-top: 10px">详情介绍：{{ book['detail'] }}</p>
+                    </div>
                 </div>
             {% endfor %}
         </div>

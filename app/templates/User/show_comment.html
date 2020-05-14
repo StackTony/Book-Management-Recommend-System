@@ -78,7 +78,8 @@
             //监听提交
             form.on('submit(discuss)', function (data) {
                 //layer.msg(JSON.stringify(data.field));
-                $.ajax({
+
+                    $.ajax({
                     url: "{{ url_for('main.add_comment') }}",
                     type: "POST",
                     data: data.field,
@@ -86,11 +87,14 @@
                         if (data == 'ok') {
                             layer.msg('发表成功！');
                             window.location.href = "{{ url_for('main.show_comment') }}";
-                        } else {
+                        } else if(data == 'null'){
+                            layer.msg('评论不能为空！')
+                        } else{
                             layer.msg('评论失败！')
                         }
                     }
                 })
+
                 return false;
             });
 

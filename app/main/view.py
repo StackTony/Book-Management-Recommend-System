@@ -17,6 +17,7 @@ from ..models import User, Admin, Book, Rating, Orders, Inventory, Favorite, Com
 BOOK_PHOTO = 'book_icon.jpg'
 USER_PHOTO = 'user_icon.jpg'
 
+
 # 首页   √
 @main.route('/', methods=['GET', 'POST'])
 def index():
@@ -177,11 +178,11 @@ def add_new_book():
             # 保存文件
             f.save(file_path)
             if book.book_photo != BOOK_PHOTO:
-                #删除原来图片
+                # 删除原来图片
                 os.remove(upload_path + book.book_photo)
             book.book_photo = f.filename
         session['photo'] = book.book_photo
-    return render_template('/Admin/add_new_book.html', name=session.get('admin_name'), form=form, book = book)
+    return render_template('/Admin/add_new_book.html', name=session.get('admin_name'), form=form, book=book)
 
 
 # 管理员-图书管理-添加书籍-库存补充   √
@@ -244,7 +245,8 @@ def modify_book():
     # 利用ajax传值获取信息进行后台操作，放到delete_book和edit_book中
     return render_template('/Admin/modify_book.html', name=session.get('admin_name'), form=form)
 
-#管理员-图书管理-修改图书详情页
+
+# 管理员-图书管理-修改图书详情页
 @main.route('/change_book_info', methods=['GET', 'POST'])
 @login_required
 def change_book_info():
@@ -260,7 +262,7 @@ def change_book_info():
         publish_name = request.values.get("publish_name")
         publish_date = request.values.get("publish_date")
         detail = request.values.get("detail")
-        #只是进行图片上传
+        # 只是进行图片上传
         if book_name is None:
             f = request.files["files"]
             base_path = os.getcwd()
@@ -271,7 +273,7 @@ def change_book_info():
             # 保存文件
             f.save(file_path)
             if book.book_photo != BOOK_PHOTO:
-                #删除原来图片
+                # 删除原来图片
                 os.remove(upload_path + book.book_photo)
             book.book_photo = f.filename
             return render_template('/Admin/book_info.html', name=session.get('admin_name'), book=book)
@@ -290,7 +292,8 @@ def change_book_info():
         book_id = request.args.get('book_id')
         book = Book.query.filter_by(book_id=book_id).first()
         session['book_id'] = book_id
-        return render_template('/Admin/book_info.html',name=session.get('admin_name'),book=book)
+        return render_template('/Admin/book_info.html', name=session.get('admin_name'), book=book)
+
 
 # 管理员-图书管理-修改图书基本信息
 # 删除图书
@@ -665,14 +668,17 @@ def add_comment():
         user_id = session['user_id']
         book_id = session['book_id']
         comment_content = request.values.get('comment')
-        discuss = Comment()
-        discuss.user_id = user_id
-        discuss.book_id = book_id
-        discuss.comment = comment_content
-        discuss.comment_time = 'suibian-test'
-        db.session.add(discuss)
-        db.session.commit()
-        data = 'ok'
+        if comment_content == "":
+            data = 'null'
+        else:
+            discuss = Comment()
+            discuss.user_id = user_id
+            discuss.book_id = book_id
+            discuss.comment = comment_content
+            discuss.comment_time = str(datetime.now())
+            db.session.add(discuss)
+            db.session.commit()
+            data = 'ok'
     return jsonify(data)
 
 
@@ -946,12 +952,12 @@ def user_info():
         base_path = os.getcwd()
         app_path = os.path.join(base_path, 'app/')
         static_path = os.path.join(app_path, 'static/')
-        upload_path = os.path.join(static_path,'users/')
+        upload_path = os.path.join(static_path, 'users/')
         file_path = upload_path + secure_filename(f.filename)
-        #保存文件
+        # 保存文件
         f.save(file_path)
         if user.photo != USER_PHOTO:
-            #删除原来图片
+            # 删除原来图片
             os.remove(upload_path + user.photo)
         user.photo = f.filename
         db.session.add(user)
@@ -977,6 +983,7 @@ def my_books():
             'publish_name': book.publish_name,
             'publish_date': book.publish_date,
             'store_number': book.store_number,
+            'book_photo': book.book_photo,
             'detail': book.detail
         }
         favor_books.append(item)
@@ -994,6 +1001,7 @@ def my_books():
             'publish_name': book.publish_name,
             'publish_date': book.publish_date,
             'store_number': book.store_number,
+            'book_photo': book.book_photo,
             'detail': book.detail
         }
         buy_books.append(item)
@@ -1163,5 +1171,4 @@ def logout():
 # 测试页面
 @main.route("/test", methods=['GET', 'POST'])
 def test():
-
     return render_template('/User/test.html')
